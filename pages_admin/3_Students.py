@@ -19,6 +19,12 @@ with col2:
     all_timings = sorted({t for timings in BATCH_TIMINGS.values() for t in timings})
     timing_filter = st.selectbox("Filter by Timing", options=["All"] + all_timings)
 
+col3, col4 = st.columns(2)
+with col3:
+    admission_start = st.date_input("Admission date from", value=None, format="DD/MM/YYYY")
+with col4:
+    admission_end = st.date_input("Admission date to", value=None, format="DD/MM/YYYY")
+
 students = get_all_students()
 
 if search_name:
@@ -27,6 +33,10 @@ if batch_filter != "All":
     students = [s for s in students if s["batch"] == batch_filter]
 if timing_filter != "All":
     students = [s for s in students if s["timing"] == timing_filter]
+if admission_start:
+    students = [s for s in students if date.fromisoformat(s["admission_date"]) >= admission_start]
+if admission_end:
+    students = [s for s in students if date.fromisoformat(s["admission_date"]) <= admission_end]
 
 st.markdown("---")
 
