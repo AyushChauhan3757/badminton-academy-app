@@ -1,7 +1,7 @@
 import streamlit as st
 from utils.auth import init_session, check_idle_timeout, logout, now_ist
 
-st.set_page_config(page_title="Avni Badminton Academy", page_icon="🏸")
+st.set_page_config(page_title="Avni Badminton Academy", page_icon="🏸", layout="wide")
 
 init_session()
 check_idle_timeout()
@@ -36,7 +36,7 @@ else:
         st.Page("pages_admin/6_Log.py", title="Transaction Log"),
     ]
 
-        coach_pages = [
+    coach_pages = [
         st.Page("pages_coach/1_Pending.py", title="Fees Pending"),
         st.Page("pages_coach/2_Students.py", title="Students Roster"),
         st.Page("pages_coach/3_Gym.py", title="Gym Roster"),

@@ -2,6 +2,11 @@ import streamlit as st
 from datetime import datetime, timedelta
 import pytz
 
+# ⚠️ TEMPORARY DEV BYPASS — set to False before any real testing or deployment.
+from constants import ROLE_ADMIN, ROLE_COACH
+DEV_SKIP_LOGIN = True
+DEV_SKIP_LOGIN_ROLE = ROLE_ADMIN  # change to ROLE_COACH if you want to test coach view instead
+
 IST = pytz.timezone("Asia/Kolkata")
 IDLE_TIMEOUT_MINUTES = 30
 
@@ -11,6 +16,10 @@ def now_ist():
 
 
 def init_session():
+    if DEV_SKIP_LOGIN and "role" not in st.session_state:
+        st.session_state.role = DEV_SKIP_LOGIN_ROLE
+        st.session_state.last_active = now_ist()
+        return
     if "role" not in st.session_state:
         st.session_state.role = None
     if "last_active" not in st.session_state:
