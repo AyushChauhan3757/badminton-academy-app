@@ -4,6 +4,8 @@ from datetime import date
 from utils.auth import require_role, now_ist
 from constants import ROLE_ADMIN
 from db.payments import get_pending_fees, mark_fee_paid, get_paid_fees, get_missed_last_month
+from db.students import delete_student
+from db.gym_members import delete_gym_member
 
 require_role([ROLE_ADMIN])
 
@@ -21,13 +23,53 @@ TABLE_ROWS_HEIGHT = 380
 last_day = calendar.monthrange(current_year, current_month)[1]
 show_highlight = today.day >= (last_day - 6)
 
-# --- Missed Last Month section (read-only for now; Paid/Left actions come next) ---
+# --- Missed Last Month section ---
+# Both actions now go through a confirm popup before writing, matching the
+# two-step safeguard pattern used everywhere else in the app:
+#   - Paid: confirm -> mark_fee_paid() with the missed month/year explicitly
+#   - Left: confirm -> delete_student() / delete_gym_member() (hard delete,
+#     payment history stays intact per spec)
 missed_list, missed_month, missed_year = get_missed_last_month()
+
+
+@st.dialog("Confirm Payment")
+def confirm_missed_paid(p):
+    st.write(f"Mark **{p['name']}**'s fee as paid for {calendar.month_name[missed_month]} {missed_year}?")
+    st.write(f"Amount: ₹{p['amount']}")
+    col_yes, col_no = st.columns(2)
+    if col_yes.button("Yes", key="missed_paid_yes", use_container_width=True):
+        mark_fee_paid(
+            payer_type=p['payer_type'],
+            payer_id=p['payer_id'],
+            amount=p['amount'],
+            month=missed_month,
+            year=missed_year,
+            marked_by="admin"
+        )
+        st.rerun()
+    if col_no.button("Cancel", key="missed_paid_no", use_container_width=True):
+        st.rerun()
+
+
+@st.dialog("Confirm Removal")
+def confirm_missed_left(p):
+    st.write(f"Remove **{p['name']}** ({p['payer_type'].capitalize()}) from the academy?")
+    st.write("This deletes their record. Any past payment history is kept.")
+    col_yes, col_no = st.columns(2)
+    if col_yes.button("Yes", key="missed_left_yes", use_container_width=True):
+        if p['payer_type'] == 'student':
+            delete_student(p['payer_id'])
+        else:
+            delete_gym_member(p['payer_id'])
+        st.rerun()
+    if col_no.button("Cancel", key="missed_left_no", use_container_width=True):
+        st.rerun()
+
 
 with st.container(border=True):
     st.markdown("**Missed Last Month**")
 
-    col_widths = [0.5, 0.2, 0.3]
+    col_widths = [0.4, 0.15, 0.2, 0.125, 0.125]
     header_cols = st.columns(col_widths)
     header_cols[0].markdown("**Name**")
     header_cols[1].markdown("**Type**")
@@ -42,6 +84,12 @@ with st.container(border=True):
                 row_cols[0].markdown(p['name'])
                 row_cols[1].markdown(p['payer_type'].capitalize())
                 row_cols[2].markdown(f"₹{p['amount']}")
+
+                if row_cols[3].button("Paid", key=f"missed_paid_{p['payer_type']}_{p['payer_id']}"):
+                    confirm_missed_paid(p)
+
+                if row_cols[4].button("Left", key=f"missed_left_{p['payer_type']}_{p['payer_id']}"):
+                    confirm_missed_left(p)
 
 st.divider()
 
