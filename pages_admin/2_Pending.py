@@ -3,7 +3,7 @@ import calendar
 from datetime import date
 from utils.auth import require_role, now_ist
 from constants import ROLE_ADMIN
-from db.payments import get_pending_fees, mark_fee_paid, get_paid_fees
+from db.payments import get_pending_fees, mark_fee_paid, get_paid_fees, get_missed_last_month
 
 require_role([ROLE_ADMIN])
 
@@ -13,9 +13,37 @@ today = now_ist()
 current_month = today.month
 current_year = today.year
 
+# Fixed height for the scrollable row area — roughly fits 10 rows before scrolling kicks in.
+# Same constant used on all four tables so they stay visually uniform regardless of row count.
+TABLE_ROWS_HEIGHT = 380
+
 # Highlight rule: final 7 days of the month (spec: today >= last_day - 6)
 last_day = calendar.monthrange(current_year, current_month)[1]
 show_highlight = today.day >= (last_day - 6)
+
+# --- Missed Last Month section (read-only for now; Paid/Left actions come next) ---
+missed_list, missed_month, missed_year = get_missed_last_month()
+
+with st.container(border=True):
+    st.markdown("**Missed Last Month**")
+
+    col_widths = [0.5, 0.2, 0.3]
+    header_cols = st.columns(col_widths)
+    header_cols[0].markdown("**Name**")
+    header_cols[1].markdown("**Type**")
+    header_cols[2].markdown("**Amount**")
+
+    with st.container(height=TABLE_ROWS_HEIGHT, border=False):
+        if not missed_list:
+            st.info("No one missed last month's payment.")
+        else:
+            for p in missed_list:
+                row_cols = st.columns(col_widths)
+                row_cols[0].markdown(p['name'])
+                row_cols[1].markdown(p['payer_type'].capitalize())
+                row_cols[2].markdown(f"₹{p['amount']}")
+
+st.divider()
 
 # --- Fetch and split into Students / Gym ---
 pending = get_pending_fees(current_month, current_year)
@@ -43,10 +71,6 @@ st.divider()
 
 def row_key(p):
     return f"chk_{p['payer_type']}_{p['payer_id']}"
-
-# Fixed height for the scrollable row area — roughly fits 10 rows before scrolling kicks in.
-# Same constant used on all four tables so they stay visually uniform regardless of row count.
-TABLE_ROWS_HEIGHT = 380
 
 def render_not_paid_table(title, items, button_key):
     with st.container(border=True):

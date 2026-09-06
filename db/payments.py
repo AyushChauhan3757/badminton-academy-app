@@ -160,3 +160,68 @@ def get_paid_fees(month=None, year=None):
 
     paid.sort(key=lambda x: x["name"].lower())
     return paid
+
+def get_missed_last_month():
+    """
+    Returns a merged, name-sorted list of students and gym members
+    who have NO payments row for the PREVIOUS IST month/year.
+    Same shape as get_pending_fees(), but always targets last month
+    (not current), since this is a separate query per spec.
+    """
+    now = now_ist()
+    month = now.month
+    year = now.year
+
+    # Roll back one month (handle January -> December of prior year)
+    if month == 1:
+        prev_month = 12
+        prev_year = year - 1
+    else:
+        prev_month = month - 1
+        prev_year = year
+
+    conn = get_connection()
+
+    # Students missing a payment row for prev_month/prev_year
+    student_result = conn.execute(
+        """
+        SELECT s.id, s.name, s.fees
+        FROM students s
+        WHERE NOT EXISTS (
+            SELECT 1 FROM payments p
+            WHERE p.payer_type = 'student'
+              AND p.payer_id = s.id
+              AND p.month = ?
+              AND p.year = ?
+        )
+        """,
+        (prev_month, prev_year)
+    )
+    students = [
+        {'payer_type': 'student', 'payer_id': row[0], 'name': row[1], 'amount': row[2]}
+        for row in student_result.rows
+    ]
+
+    # Gym members missing a payment row for prev_month/prev_year
+    gym_result = conn.execute(
+        """
+        SELECT g.id, g.name
+        FROM gym_members g
+        WHERE NOT EXISTS (
+            SELECT 1 FROM payments p
+            WHERE p.payer_type = 'gym'
+              AND p.payer_id = g.id
+              AND p.month = ?
+              AND p.year = ?
+        )
+        """,
+        (prev_month, prev_year)
+    )
+    gym_members = [
+        {'payer_type': 'gym', 'payer_id': row[0], 'name': row[1], 'amount': GYM_FEE}
+        for row in gym_result.rows
+    ]
+
+    combined = students + gym_members
+    combined.sort(key=lambda x: x['name'])
+    return combined, prev_month, prev_year
