@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS payments (
   amount INTEGER NOT NULL,
   paid_on DATE NOT NULL,
   marked_by TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(payer_type, payer_id, month, year)
 );
 
@@ -54,5 +55,6 @@ CREATE TABLE IF NOT EXISTS transactions (
   category TEXT NOT NULL,
   amount INTEGER NOT NULL,
   date DATE NOT NULL,
-  description TEXT
+  description TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
