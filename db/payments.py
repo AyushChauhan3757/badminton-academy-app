@@ -82,13 +82,15 @@ def mark_fee_paid(payer_type, payer_id, amount, month, year, marked_by):
     paid_on is always today (IST) — the actual date paid.
     """
     conn = get_connection()
-    today = now_ist().date()
+    now = now_ist()
+    today = now.date()
+    created_at = now.strftime("%Y-%m-%d %H:%M:%S")
     conn.execute(
         """
-        INSERT INTO payments (payer_type, payer_id, month, year, amount, paid_on, marked_by)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO payments (payer_type, payer_id, month, year, amount, paid_on, marked_by, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """,
-        [payer_type, payer_id, month, year, amount, str(today), marked_by],
+        [payer_type, payer_id, month, year, amount, str(today), marked_by, created_at],
     )
 
 

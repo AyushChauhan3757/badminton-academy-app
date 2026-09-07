@@ -31,14 +31,16 @@ def clear_coach_salary(coach_id, coach_name, salary_amount, month=None, year=Non
         month = today.month
         year = today.year
 
-    today_date = now_ist().date().isoformat()
+    now = now_ist()
+    today_date = now.date().isoformat()
+    created_at = now.strftime("%Y-%m-%d %H:%M:%S")
 
     conn = get_connection()
     conn.execute(
-        "INSERT INTO salary_payouts (coach_id, month, year, amount, paid_on) VALUES (?, ?, ?, ?, ?)",
-        (coach_id, month, year, salary_amount, today_date)
+        "INSERT INTO salary_payouts (coach_id, month, year, amount, paid_on, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+        (coach_id, month, year, salary_amount, today_date, created_at)
     )
     conn.execute(
-        "INSERT INTO transactions (type, category, amount, date, description) VALUES (?, ?, ?, ?, ?)",
-        ('expense', 'salary', salary_amount, today_date, coach_name)
+        "INSERT INTO transactions (type, category, amount, date, description, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+        ('expense', 'salary', salary_amount, today_date, coach_name, created_at)
     )
