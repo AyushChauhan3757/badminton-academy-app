@@ -167,6 +167,10 @@ def get_missed_last_month():
     """
     Returns a merged, name-sorted list of students and gym members
     who have NO payments row for the PREVIOUS IST month/year.
+    Only includes people who were already enrolled before the current
+    month started (i.e. they actually existed during the missed month) —
+    otherwise a brand-new student/member would wrongly show up here just
+    because they have no payment row for a month before they even joined.
     Same shape as get_pending_fees(), but always targets last month
     (not current), since this is a separate query per spec.
     """
@@ -182,14 +186,19 @@ def get_missed_last_month():
         prev_month = month - 1
         prev_year = year
 
+    # Anyone who joined on/after this date wasn't enrolled last month yet
+    current_month_start = f"{year:04d}-{month:02d}-01"
+
     conn = get_connection()
 
-    # Students missing a payment row for prev_month/prev_year
+    # Students missing a payment row for prev_month/prev_year,
+    # AND who were already admitted before the current month started
     student_result = conn.execute(
         """
         SELECT s.id, s.name, s.fees
         FROM students s
-        WHERE NOT EXISTS (
+        WHERE s.admission_date < ?
+          AND NOT EXISTS (
             SELECT 1 FROM payments p
             WHERE p.payer_type = 'student'
               AND p.payer_id = s.id
@@ -197,19 +206,21 @@ def get_missed_last_month():
               AND p.year = ?
         )
         """,
-        (prev_month, prev_year)
+        (current_month_start, prev_month, prev_year)
     )
     students = [
         {'payer_type': 'student', 'payer_id': row[0], 'name': row[1], 'amount': row[2]}
         for row in student_result.rows
     ]
 
-    # Gym members missing a payment row for prev_month/prev_year
+    # Gym members missing a payment row for prev_month/prev_year,
+    # AND who already joined before the current month started
     gym_result = conn.execute(
         """
         SELECT g.id, g.name
         FROM gym_members g
-        WHERE NOT EXISTS (
+        WHERE g.joining_date < ?
+          AND NOT EXISTS (
             SELECT 1 FROM payments p
             WHERE p.payer_type = 'gym'
               AND p.payer_id = g.id
@@ -217,7 +228,7 @@ def get_missed_last_month():
               AND p.year = ?
         )
         """,
-        (prev_month, prev_year)
+        (current_month_start, prev_month, prev_year)
     )
     gym_members = [
         {'payer_type': 'gym', 'payer_id': row[0], 'name': row[1], 'amount': GYM_FEE}
