@@ -4,8 +4,8 @@ import pytz
 
 # ⚠️ TEMPORARY DEV BYPASS — set to False before any real testing or deployment.
 from constants import ROLE_ADMIN, ROLE_COACH
-DEV_SKIP_LOGIN = True
-DEV_SKIP_LOGIN_ROLE = ROLE_COACH  # change to ROLE_COACH if you want to test coach view instead
+DEV_SKIP_LOGIN = False
+#DEV_SKIP_LOGIN_ROLE = ROLE_COACH  # change to ROLE_COACH if you want to test coach view instead
 
 IST = pytz.timezone("Asia/Kolkata")
 IDLE_TIMEOUT_MINUTES = 30
