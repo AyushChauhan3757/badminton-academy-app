@@ -27,8 +27,7 @@ with col_a:
     if st.button("+ Add Transaction"):
         st.session_state.show_add_transaction = True
 with col_b:
-    if st.button("View Full Log"):
-        st.info("Full Log page is coming in Step 11 — not built yet.")
+    st.page_link("pages_admin/6_Log.py", label="View Full Log")
 
 if st.session_state.get("show_add_transaction"):
     @st.dialog("Add Transaction")
