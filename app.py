@@ -3,6 +3,7 @@ from utils.auth import init_session, check_idle_timeout, logout, now_ist
 from utils.styling import apply_theme
 
 st.set_page_config(page_title="Avni Badminton Academy", page_icon="🏸", layout="wide")
+st.logo("assets/logo.png", size="large")
 apply_theme()
 
 init_session()
@@ -30,18 +31,18 @@ if st.session_state.role is None:
 
 else:
     admin_pages = [
-        st.Page("pages_admin/1_Overview.py", title="Overview"),
-        st.Page("pages_admin/2_Pending.py", title="Fees Pending"),
-        st.Page("pages_admin/3_Students.py", title="Students Roster"),
-        st.Page("pages_admin/4_Coaches.py", title="Coaches List"),
-        st.Page("pages_admin/5_Gym.py", title="Gym Roster"),
-        st.Page("pages_admin/6_Log.py", title="Transaction Log"),
+        st.Page("pages_admin/1_Overview.py", title="Overview", icon=":material/space_dashboard:"),
+        st.Page("pages_admin/2_Pending.py", title="Fees Pending", icon=":material/pending_actions:"),
+        st.Page("pages_admin/3_Students.py", title="Students Roster", icon=":material/school:"),
+        st.Page("pages_admin/4_Coaches.py", title="Coaches List", icon=":material/groups:"),
+        st.Page("pages_admin/5_Gym.py", title="Gym Roster", icon=":material/fitness_center:"),
+        st.Page("pages_admin/6_Log.py", title="Transaction Log", icon=":material/receipt_long:"),
     ]
 
     coach_pages = [
-        st.Page("pages_coach/1_Pending.py", title="Fees Pending"),
-        st.Page("pages_coach/2_Students.py", title="Students Roster"),
-        st.Page("pages_coach/3_Gym.py", title="Gym Roster"),
+        st.Page("pages_coach/1_Pending.py", title="Fees Pending", icon=":material/pending_actions:"),
+        st.Page("pages_coach/2_Students.py", title="Students Roster", icon=":material/school:"),
+        st.Page("pages_coach/3_Gym.py", title="Gym Roster", icon=":material/fitness_center:"),
     ]
 
     pages = admin_pages if st.session_state.role == "admin" else coach_pages
