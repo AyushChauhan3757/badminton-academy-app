@@ -1,7 +1,9 @@
 import streamlit as st
 from utils.auth import init_session, check_idle_timeout, logout, now_ist
+from utils.styling import apply_theme
 
 st.set_page_config(page_title="Avni Badminton Academy", page_icon="🏸", layout="wide")
+apply_theme()
 
 init_session()
 check_idle_timeout()
