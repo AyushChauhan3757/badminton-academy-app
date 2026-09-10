@@ -112,8 +112,17 @@ def apply_theme():
         }
 
         /* Hide the logo Streamlit relocates into the top header when the sidebar is collapsed (e.g. on mobile) */
-        [data-testid="stHeader"] [data-testid="stLogo"] {
+        [data-testid="stHeader"] [data-testid="stHeaderLogo"] {
             display: none !important;
+        }
+
+        /* Card-style bordered containers (used for KPI cards, table panels, etc.) */
+        div[data-testid="stVerticalBlockBorderWrapper"] {
+            background-color: #FFFFFF !important;
+            border: 1px solid #E5EAF1 !important;
+            border-radius: 16px !important;
+            box-shadow: 0 2px 8px rgba(20, 48, 79, 0.06) !important;
+            padding: 1rem !important;
         }
         </style>
     """, unsafe_allow_html=True)
