@@ -3,10 +3,11 @@ from utils.auth import require_role
 from constants import ROLE_ADMIN
 from db.coaches import get_all_coaches, add_coach, update_coach, delete_coach
 from db.salary import get_salary_status, clear_coach_salary
+from utils.header import render_header
 
 require_role([ROLE_ADMIN])
 
-st.title("Coaches List")
+render_header("Coaches List")
 
 if st.button("+ Add Coach"):
     st.session_state.show_add_coach = True

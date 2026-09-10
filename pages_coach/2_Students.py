@@ -4,10 +4,11 @@ import streamlit as st
 from utils.auth import require_role
 from constants import ROLE_COACH, BATCH_TIMINGS
 from db.students import get_all_students
+from utils.header import render_header
 
 require_role([ROLE_COACH])
 
-st.title("Students Roster")
+render_header("Students Roster")
 
 students = get_all_students()
 

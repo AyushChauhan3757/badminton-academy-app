@@ -6,10 +6,11 @@ from constants import ROLE_ADMIN
 from db.payments import get_pending_fees, mark_fee_paid, get_paid_fees, get_missed_last_month
 from db.students import delete_student
 from db.gym_members import delete_gym_member
+from utils.header import render_header
 
 require_role([ROLE_ADMIN])
 
-st.title("Fees Pending")
+render_header("Fees Pending")
 
 today = now_ist()
 current_month = today.month

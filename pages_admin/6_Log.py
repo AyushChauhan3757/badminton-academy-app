@@ -3,10 +3,11 @@ from datetime import date, timedelta
 from utils.auth import require_role, now_ist
 from constants import ROLE_ADMIN
 from db.log import get_log_page, get_log_total_count, PAGE_SIZE
+from utils.header import render_header
 
 require_role([ROLE_ADMIN])
 
-st.title("Activity Log")
+render_header("Activity Log")
 
 # --- Session state defaults ---
 if "log_page" not in st.session_state:

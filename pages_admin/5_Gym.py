@@ -8,10 +8,11 @@ from db.gym_members import (
     update_gym_member,
     delete_gym_member,
 )
+from utils.header import render_header
 
 require_role([ROLE_ADMIN])
 
-st.title("Gym Roster")
+render_header("Gym Roster")
 
 
 @st.dialog("Add Gym Member")

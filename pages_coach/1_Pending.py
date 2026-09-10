@@ -4,10 +4,11 @@ from datetime import date
 from utils.auth import require_role, now_ist
 from constants import ROLE_COACH
 from db.payments import get_pending_fees, mark_fee_paid, get_paid_fees
+from utils.header import render_header
 
 require_role([ROLE_COACH])
 
-st.title("Fees Pending")
+render_header("Fees Pending")
 
 today = now_ist()
 current_month = today.month

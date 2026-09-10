@@ -5,10 +5,11 @@ import streamlit as st
 from constants import BATCH_FEES, BATCH_TIMINGS, ROLE_ADMIN
 from db.students import add_student, delete_student, get_all_students, update_student
 from utils.auth import require_role
+from utils.header import render_header
 
 require_role([ROLE_ADMIN])
 
-st.title("Students Roster")
+render_header("Students Roster")
 
 search_name = st.text_input("Search by name")
 

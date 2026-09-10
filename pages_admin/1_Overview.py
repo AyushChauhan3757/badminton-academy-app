@@ -3,10 +3,11 @@ from utils.auth import require_role
 from constants import ROLE_ADMIN
 from db.overview import get_totals
 from db.overview import get_recent_log
+from utils.header import render_header
 
 require_role([ROLE_ADMIN])
 
-st.title("Overview")
+render_header("Overview")
 
 totals = get_totals()
 

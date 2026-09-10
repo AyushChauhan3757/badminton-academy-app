@@ -4,10 +4,11 @@ import streamlit as st
 from utils.auth import require_role
 from constants import ROLE_COACH
 from db.gym_members import get_all_gym_members
+from utils.header import render_header
 
 require_role([ROLE_COACH])
 
-st.title("Gym Roster")
+render_header("Gym Roster")
 
 members = get_all_gym_members()
 

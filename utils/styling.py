@@ -9,6 +9,16 @@ def apply_theme():
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
+        /* Reduce default top padding of the main content area */
+        .block-container {
+            padding-top: 2rem !important;
+        }
+
+        /* Increase page title size (e.g. "Overview", "Fees Pending") */
+        [data-testid="stAppViewContainer"] h1 {
+            font-size: 3.2rem !important;
+        }
+
         /* Enlarge the sidebar logo + its container */
         [data-testid="stSidebar"] [data-testid="stLogo"] {
             height: 16rem !important;
@@ -41,14 +51,18 @@ def apply_theme():
             background-color: #14304F;
         }
 
-        /* Sidebar nav links (st.Page items) - font size + spacing */
+                /* Sidebar nav links (st.Page items) - font size + spacing */
         section[data-testid="stSidebar"] a {
             color: #EEF3F9 !important;
             border-radius: 8px;
             font-weight: 500;
-            font-size: 1.3rem !important;
+            font-size: 1.25rem !important;
             padding: 0.75rem 1rem !important;
-            margin-bottom: 0.35rem !important;
+            margin-bottom: 0.175rem !important;
+        }
+        section[data-testid="stSidebar"] a span,
+        section[data-testid="stSidebar"] a p {
+            font-size: 1.25rem !important;
         }
 
         /* Active/selected nav item */
@@ -81,17 +95,9 @@ def apply_theme():
             color: #14304F !important;
         }
 
-        /* Reset Streamlit's own sidebar collapse arrow - don't apply our button styling to it */
-        section[data-testid="stSidebar"] button[data-testid="stSidebarCollapseButton"] {
-            background-color: transparent !important;
-            box-shadow: none !important;
-            border: none !important;
-            padding: 0.25rem !important;
-        }
-        section[data-testid="stSidebar"] button[data-testid="stSidebarCollapseButton"] p,
-        section[data-testid="stSidebar"] button[data-testid="stSidebarCollapseButton"] svg {
-            color: #EEF3F9 !important;
-            fill: #EEF3F9 !important;
+        /* Hide Streamlit's sidebar collapse button entirely - sidebar should not be collapsible on desktop */
+        div[data-testid="stSidebarCollapseButton"] {
+            display: none !important;
         }
         </style>
     """, unsafe_allow_html=True)

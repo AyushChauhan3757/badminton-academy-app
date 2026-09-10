@@ -47,11 +47,5 @@ else:
 
     pages = admin_pages if st.session_state.role == "admin" else coach_pages
 
-    with st.sidebar:
-        st.write(f"Logged in as: **{st.session_state.role}**")
-        if st.button("Logout"):
-            logout()
-            st.rerun()
-
     nav = st.navigation(pages)
     nav.run()
