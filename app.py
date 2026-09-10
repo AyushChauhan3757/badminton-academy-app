@@ -3,13 +3,14 @@ from utils.auth import init_session, check_idle_timeout, logout, now_ist
 from utils.styling import apply_theme
 
 st.set_page_config(page_title="Avni Badminton Academy", page_icon="🏸", layout="wide")
-st.logo("assets/logo.png", size="large")
 apply_theme()
 
 init_session()
 check_idle_timeout()
 
-if st.session_state.role is None:
+
+def login_screen():
+    st.logo("assets/logo.png", size="large")
     st.title("Avni Badminton Academy")
 
     with st.form("login_form"):
@@ -29,7 +30,12 @@ if st.session_state.role is None:
         else:
             st.error("Incorrect password.")
 
+
+if st.session_state.role is None:
+    pages = [st.Page(login_screen, title="Login")]
 else:
+    st.logo("assets/logo.png", size="large")
+
     admin_pages = [
         st.Page("pages_admin/1_Overview.py", title="Overview", icon=":material/space_dashboard:"),
         st.Page("pages_admin/2_Pending.py", title="Fees Pending", icon=":material/pending_actions:"),
@@ -47,5 +53,5 @@ else:
 
     pages = admin_pages if st.session_state.role == "admin" else coach_pages
 
-    nav = st.navigation(pages)
-    nav.run()
+nav = st.navigation(pages)
+nav.run()

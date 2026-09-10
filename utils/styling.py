@@ -99,5 +99,21 @@ def apply_theme():
         div[data-testid="stSidebarCollapseButton"] {
             display: none !important;
         }
+
+        /* Logo becomes a clickable button on non-home pages - strip button styling from it */
+        [data-testid="stSidebarHeader"] button[data-testid="stLogoLink"] {
+            background-color: transparent !important;
+            border: none !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+        }
+        [data-testid="stSidebarHeader"] button[data-testid="stLogoLink"]:hover {
+            background-color: transparent !important;
+        }
+
+        /* Hide the logo Streamlit relocates into the top header when the sidebar is collapsed (e.g. on mobile) */
+        [data-testid="stHeader"] [data-testid="stLogo"] {
+            display: none !important;
+        }
         </style>
     """, unsafe_allow_html=True)
