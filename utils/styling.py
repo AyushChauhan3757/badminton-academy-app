@@ -213,7 +213,20 @@ def apply_table_card_styles():
     .table-divider {
         border: none;
         border-top: 1px solid #E5EAF1;
-        margin: 0.5rem 0 0.75rem 0;
+        margin: 0.5rem 0 0 0;
+    }
+
+    /* Tighten row spacing and enlarge row text inside table-style cards */
+    div[class*="st-key-card_"] [data-testid="stHorizontalBlock"] {
+        margin-bottom: 0 !important;
+    }
+    div[class*="st-key-card_"] [data-testid="stVerticalBlockBorderWrapper"],
+    div[class*="st-key-card_"] .element-container {
+        margin-bottom: 0.3rem !important;
+    }
+    div[class*="st-key-card_"] p {
+        font-size: 1.05rem !important;
+        margin-bottom: 0 !important;
     }
     </style>
     """, unsafe_allow_html=True)
