@@ -51,7 +51,7 @@ def apply_theme():
             background-color: #14304F;
         }
 
-                /* Sidebar nav links (st.Page items) - font size + spacing */
+        /* Sidebar nav links (st.Page items) - font size + spacing */
         section[data-testid="stSidebar"] a {
             color: #EEF3F9 !important;
             border-radius: 8px;
@@ -130,6 +130,12 @@ def apply_theme():
 def apply_login_styles():
     st.markdown("""
         <style>
+        html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
+            margin: 0 !important;
+            padding: 0 !important;
+            height: 100vh !important;
+            overflow: hidden !important;
+        }
         section[data-testid="stSidebar"] { display: none !important; }
         div[data-testid="stSidebarCollapsedControl"] { display: none !important; }
         header[data-testid="stHeader"] { display: none !important; }
@@ -139,74 +145,41 @@ def apply_login_styles():
             max-width: 100% !important;
         }
 
-        /* Full login page */
+        /* Full login page - background image, full bleed */
         .st-key-login_page {
-            position: relative !important;
-            width: 100% !important;
-            min-height: 100vh !important;
-            height: 100vh !important;
-            background-color: #FFFFFF;
-            overflow: hidden !important;
-        }
-
-        /* Navy curved shape */
-        .st-key-login_page .login-navy-shape {
-            position: absolute !important;
-            top: -15% !important;
-            right: -15% !important;
-            width: 62% !important;
-            height: 130% !important;
-            background: linear-gradient(135deg, #0D2340, #14304F);
-            border-radius: 55% 0 0 45% / 50% 0 0 50%;
-            z-index: 1 !important;
-        }
-
-        /* Illustration - fixed to the right */
-        .st-key-login_illustration_panel {
-            position: absolute !important;
-            top: 50% !important;
-            right: 4% !important;
-            transform: translateY(-50%) !important;
-            width: auto !important;
-            height: 65vh !important;
-            max-height: 650px !important;
-            z-index: 2 !important;
-            pointer-events: none !important;
-        }
-
-        .st-key-login_illustration_panel img {
-            width: auto !important;
-            height: 100% !important;
-            max-height: 650px !important;
-            object-fit: contain !important;
-            display: block !important;
-        }
-
-        /* Login section - fixed to the left */
-        .st-key-login_form_panel {
-            position: absolute !important;
+            position: fixed !important;
             top: 0 !important;
             left: 0 !important;
-            width: 52% !important;
+            width: 100vw !important;
             height: 100vh !important;
-            min-height: 100vh !important;
-            box-sizing: border-box !important;
-            display: flex !important;
-            flex-direction: column !important;
-            justify-content: center !important;
-            padding: 3rem 2rem 3rem 5rem !important;
-            z-index: 3 !important;
+            background-image: url('app/static/login_background.png');
+            background-size: cover !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+            overflow: hidden !important;
+            z-index: 9999 !important;
         }
 
-        /* Keep login content compact */
-        .st-key-login_form_panel > div {
-            max-width: 480px !important;
+        /* Login card - left-center, plain white for now (frosting comes next step) */
+        .st-key-login_form_panel {
+            position: absolute !important;
+            top: 50% !important;
+            left: 8% !important;
+            transform: translateY(-50%) !important;
+            width: 420px !important;
+            max-width: 90vw !important;
+            background-color: #FFFFFF !important;
+            border-radius: 16px !important;
+            padding: 2.5rem 2rem !important;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15) !important;
+            z-index: 3 !important;
+            align-items: center !important;
         }
 
         .st-key-login_form_panel [data-testid="stImage"] {
+            width: 100% !important;
             margin-bottom: 0.5rem !important;
         }
-
         .st-key-login_form_panel [data-testid="stImage"] img {
             width: 180px !important;
             height: auto !important;
@@ -216,36 +189,29 @@ def apply_login_styles():
             display: none !important;
         }
 
-        /* Login form width */
         .st-key-login_form_panel [data-testid="stForm"] {
-            max-width: 480px !important;
             width: 100% !important;
         }
 
-        /* Selectbox */
         div[data-testid="stSelectbox"] > div {
             border: 1px solid #D0D7E2 !important;
             border-radius: 10px !important;
             background-color: #FFFFFF !important;
         }
-
         div[data-testid="stSelectbox"] [data-rac] {
             background-color: transparent !important;
         }
 
-        /* Password input */
         div[data-testid="stTextInput"] > div {
             border: 1px solid #D0D7E2 !important;
             border-radius: 10px !important;
             background-color: #FFFFFF !important;
         }
-
         div[data-testid="stTextInput"] input {
             border: none !important;
             background-color: transparent !important;
         }
 
-        /* Login button */
         .st-key-login_submit_btn button {
             background-color: #14304F !important;
             color: #FFFFFF !important;
@@ -254,52 +220,41 @@ def apply_login_styles():
             padding: 0.75rem !important;
             border: none !important;
         }
-
         .st-key-login_submit_btn button:hover {
             background-color: #1D4C82 !important;
         }
-
         .st-key-login_submit_btn button p {
             color: #FFFFFF !important;
         }
 
-        /* Footer */
         .login-footer-row {
             display: flex;
             gap: 2rem;
-            margin-top: 2rem;
-            padding-top: 1.5rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
             border-top: 1px solid #E5EAF1;
         }
-
         .login-footer-item {
-            color: #5b6b82;
-            font-size: 0.85rem;
-            font-weight: 600;
+            color: #14304F;
+            font-size: 0.9rem;
+            font-weight: 700;
         }
 
-        /* Mobile */
         @media (max-width: 640px) {
             .st-key-login_page {
+                background-image: none !important;
+                background-color: #14304F !important;
                 height: auto !important;
                 min-height: 100vh !important;
                 overflow: visible !important;
             }
-
-            .st-key-login_page .login-navy-shape {
-                display: none !important;
-            }
-
-            .st-key-login_illustration_panel {
-                display: none !important;
-            }
-
             .st-key-login_form_panel {
                 position: relative !important;
-                width: 100% !important;
-                height: auto !important;
-                min-height: 100vh !important;
-                padding: 2.5rem 1.5rem !important;
+                top: 0 !important;
+                left: 0 !important;
+                transform: none !important;
+                width: 90% !important;
+                margin: 5vh auto !important;
             }
         }
         </style>
