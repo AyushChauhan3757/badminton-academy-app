@@ -168,7 +168,9 @@ def apply_login_styles():
             transform: translateY(-50%) !important;
             width: 420px !important;
             max-width: 90vw !important;
-            background-color: #FFFFFF !important;
+            background-color: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border-radius: 16px !important;
             padding: 2.5rem 2rem !important;
             box-shadow: 0 8px 30px rgba(0,0,0,0.15) !important;
@@ -242,6 +244,7 @@ def apply_login_styles():
 
         @media (max-width: 640px) {
             .st-key-login_page {
+                position: absolute !important;
                 background-image: none !important;
                 background-color: #14304F !important;
                 height: auto !important;
