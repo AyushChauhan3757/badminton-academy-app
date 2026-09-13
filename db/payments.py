@@ -8,7 +8,9 @@ def get_pending_fees(month=None, year=None):
     Returns a combined, name-sorted list of students and gym members
     who have NOT paid for the given month/year.
     Defaults to the current IST month/year if not specified.
-    Each item: {'payer_type', 'payer_id', 'name', 'amount'}
+    Each item: {'payer_type', 'payer_id', 'name', 'amount', 'batch'}
+    'batch' is the student's batch name, or the literal string 'Gym' for
+    gym members (avoids a Batch/Timing collision on the combined table).
     """
     if month is None or year is None:
         today = now_ist()
@@ -19,7 +21,7 @@ def get_pending_fees(month=None, year=None):
 
     students_result = conn.execute(
         """
-        SELECT s.id, s.name, s.fees
+        SELECT s.id, s.name, s.fees, s.batch
         FROM students s
         WHERE NOT EXISTS (
             SELECT 1 FROM payments p
@@ -60,6 +62,7 @@ def get_pending_fees(month=None, year=None):
             "payer_id": record["id"],
             "name": record["name"],
             "amount": record["fees"],
+            "batch": record["batch"],
         })
 
     for row in gym_rows:
@@ -69,6 +72,7 @@ def get_pending_fees(month=None, year=None):
             "payer_id": record["id"],
             "name": record["name"],
             "amount": GYM_FEE,
+            "batch": "Gym",
         })
 
     pending.sort(key=lambda x: x["name"].lower())
@@ -99,7 +103,9 @@ def get_paid_fees(month=None, year=None):
     Returns a combined, name-sorted list of students and gym members
     who HAVE paid for the given month/year.
     Defaults to the current IST month/year if not specified.
-    Each item: {'payer_type', 'payer_id', 'name', 'amount', 'paid_on', 'marked_by'}
+    Each item: {'payer_type', 'payer_id', 'name', 'amount', 'paid_on', 'marked_by', 'batch'}
+    'batch' is the student's batch name, or the literal string 'Gym' for
+    gym members (same convention as get_pending_fees()).
     """
     if month is None or year is None:
         today = now_ist()
@@ -110,7 +116,7 @@ def get_paid_fees(month=None, year=None):
 
     students_result = conn.execute(
         """
-        SELECT s.id, s.name, p.amount, p.paid_on, p.marked_by
+        SELECT s.id, s.name, p.amount, p.paid_on, p.marked_by, s.batch
         FROM payments p
         JOIN students s ON s.id = p.payer_id
         WHERE p.payer_type = 'student'
@@ -147,6 +153,7 @@ def get_paid_fees(month=None, year=None):
             "amount": record["amount"],
             "paid_on": record["paid_on"],
             "marked_by": record["marked_by"],
+            "batch": record["batch"],
         })
 
     for row in gym_rows:
@@ -158,6 +165,7 @@ def get_paid_fees(month=None, year=None):
             "amount": record["amount"],
             "paid_on": record["paid_on"],
             "marked_by": record["marked_by"],
+            "batch": "Gym",
         })
 
     paid.sort(key=lambda x: x["name"].lower())
