@@ -192,6 +192,7 @@ def apply_theme():
     apply_kpi_card_styles()
     apply_table_card_styles()
     apply_tab_styles()
+    apply_filter_control_styles()
 
 
 # =============================================================================
@@ -852,6 +853,44 @@ def apply_login_styles():
                 width: 90% !important;
                 margin: 5vh auto !important;
             }
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+# ============================================================
+# Filter / Search Controls (search bar, dropdowns, date pickers,
+# "+ Add X" primary buttons) — shared across roster-style pages
+# ============================================================
+def apply_filter_control_styles():
+    st.markdown("""
+        <style>
+        div[data-testid="stTextInput"] input,
+        div[data-testid="stDateInput"] input {
+            background-color: #FFFFFF !important;
+            border: 1px solid #D7E1EE !important;
+            border-radius: 10px !important;
+            padding: 0.55rem 0.9rem !important;
+            font-size: 0.95rem !important;
+        }
+        div[data-testid="stSelectbox"] {
+            border-radius: 10px !important;
+        }
+
+        div[class*="st-key-btn_add_student"] button,
+        div[class*="st-key-btn_add_gym"] button,
+        div[class*="st-key-btn_add_coach"] button {
+            background-color: #1D4C82 !important;
+            color: #FFFFFF !important;
+            border: none !important;
+            border-radius: 10px !important;
+            font-weight: 600 !important;
+            padding: 0.6rem 1.4rem !important;
+            width: 100% !important;
+        }
+        div[class*="st-key-btn_add_student"] button:hover,
+        div[class*="st-key-btn_add_gym"] button:hover,
+        div[class*="st-key-btn_add_coach"] button:hover {
+            background-color: #14304F !important;
         }
         </style>
     """, unsafe_allow_html=True)

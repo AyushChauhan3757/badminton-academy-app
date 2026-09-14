@@ -11,20 +11,62 @@ require_role([ROLE_ADMIN])
 
 render_header("Students Roster")
 
-search_name = st.text_input("Search by name")
 
-col1, col2 = st.columns(2)
-with col1:
-    batch_filter = st.selectbox("Filter by Batch", options=["All"] + list(BATCH_TIMINGS.keys()))
-with col2:
-    all_timings = sorted({t for timings in BATCH_TIMINGS.values() for t in timings})
-    timing_filter = st.selectbox("Filter by Timing", options=["All"] + all_timings)
+@st.dialog("Add Student", width="large")
+def add_student_dialog():
+    col1, col2 = st.columns(2)
+    with col1:
+        name = st.text_input("Name")
+        batch = st.selectbox("Batch", options=list(BATCH_TIMINGS.keys()))
+        is_custom_fee = st.checkbox("Custom Fee")
+        fee = st.number_input(
+            "Fee",
+            value=BATCH_FEES[batch],
+            disabled=not is_custom_fee,
+        )
+    with col2:
+        admission_date = st.date_input("Admission Date", value=date.today(), format="DD/MM/YYYY")
+        timing = st.selectbox("Timing", options=BATCH_TIMINGS[batch])
+        guardian_name = st.text_input("Guardian Name")
+        phone = st.text_input("Phone")
 
-col3, col4 = st.columns(2)
-with col3:
-    admission_start = st.date_input("Admission date from", value=None, format="DD/MM/YYYY")
-with col4:
-    admission_end = st.date_input("Admission date to", value=None, format="DD/MM/YYYY")
+    if st.button("Add Student", key="submit_add_student"):
+        if not name.strip():
+            st.error("Name is required.")
+        else:
+            add_student(
+                name=name.strip(),
+                admission_date=str(admission_date),
+                batch=batch,
+                timing=timing,
+                fee=fee,
+                is_custom_fee=is_custom_fee,
+                guardian_name=guardian_name.strip(),
+                phone=phone.strip(),
+            )
+            st.success(f"{name} added.")
+            st.rerun()
+
+
+with st.container(key="students_top_row"):
+    col_search, col_add = st.columns([4, 1])
+    with col_search:
+        search_name = st.text_input("Search by name", placeholder="Search by name", label_visibility="collapsed")
+    with col_add:
+        if st.button("+ Add Student", key="btn_add_student", use_container_width=True):
+            add_student_dialog()
+
+with st.container(key="students_filters_row"):
+    fcol1, fcol2, fcol3, fcol4 = st.columns(4)
+    with fcol1:
+        batch_filter = st.selectbox("Filter by Batch", options=["All"] + list(BATCH_TIMINGS.keys()))
+    with fcol2:
+        all_timings = sorted({t for timings in BATCH_TIMINGS.values() for t in timings})
+        timing_filter = st.selectbox("Filter by Timing", options=["All"] + all_timings)
+    with fcol3:
+        admission_start = st.date_input("Admission date from", value=None, format="DD/MM/YYYY")
+    with fcol4:
+        admission_end = st.date_input("Admission date to", value=None, format="DD/MM/YYYY")
 
 students = get_all_students()
 
@@ -128,43 +170,3 @@ if students:
             delete_student_dialog(s)
 else:
     st.info("No students added yet.")
-
-
-@st.dialog("Add Student", width="large")
-def add_student_dialog():
-    col1, col2 = st.columns(2)
-    with col1:
-        name = st.text_input("Name")
-        batch = st.selectbox("Batch", options=list(BATCH_TIMINGS.keys()))
-        is_custom_fee = st.checkbox("Custom Fee")
-        fee = st.number_input(
-            "Fee",
-            value=BATCH_FEES[batch],
-            disabled=not is_custom_fee,
-        )
-    with col2:
-        admission_date = st.date_input("Admission Date", value=date.today(), format="DD/MM/YYYY")
-        timing = st.selectbox("Timing", options=BATCH_TIMINGS[batch])
-        guardian_name = st.text_input("Guardian Name")
-        phone = st.text_input("Phone")
-
-    if st.button("Add Student", key="submit_add_student"):
-        if not name.strip():
-            st.error("Name is required.")
-        else:
-            add_student(
-                name=name.strip(),
-                admission_date=str(admission_date),
-                batch=batch,
-                timing=timing,
-                fee=fee,
-                is_custom_fee=is_custom_fee,
-                guardian_name=guardian_name.strip(),
-                phone=phone.strip(),
-            )
-            st.success(f"{name} added.")
-            st.rerun()
-
-
-if st.button("+ Add Student"):
-    add_student_dialog()
