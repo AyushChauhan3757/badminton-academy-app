@@ -181,6 +181,9 @@ def get_missed_last_month():
     because they have no payment row for a month before they even joined.
     Same shape as get_pending_fees(), but always targets last month
     (not current), since this is a separate query per spec.
+    Each item: {'payer_type', 'payer_id', 'name', 'amount', 'batch'}
+    'batch' is the student's batch name, or the literal string 'Gym' for
+    gym members (same convention as get_pending_fees()/get_paid_fees()).
     """
     now = now_ist()
     month = now.month
@@ -203,7 +206,7 @@ def get_missed_last_month():
     # AND who were already admitted before the current month started
     student_result = conn.execute(
         """
-        SELECT s.id, s.name, s.fees
+        SELECT s.id, s.name, s.fees, s.batch
         FROM students s
         WHERE s.admission_date < ?
           AND NOT EXISTS (
@@ -217,7 +220,7 @@ def get_missed_last_month():
         (current_month_start, prev_month, prev_year)
     )
     students = [
-        {'payer_type': 'student', 'payer_id': row[0], 'name': row[1], 'amount': row[2]}
+        {'payer_type': 'student', 'payer_id': row[0], 'name': row[1], 'amount': row[2], 'batch': row[3]}
         for row in student_result.rows
     ]
 
@@ -239,7 +242,7 @@ def get_missed_last_month():
         (current_month_start, prev_month, prev_year)
     )
     gym_members = [
-        {'payer_type': 'gym', 'payer_id': row[0], 'name': row[1], 'amount': GYM_FEE}
+        {'payer_type': 'gym', 'payer_id': row[0], 'name': row[1], 'amount': GYM_FEE, 'batch': 'Gym'}
         for row in gym_result.rows
     ]
 

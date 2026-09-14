@@ -7,11 +7,15 @@ from db.payments import get_pending_fees, mark_fee_paid, get_paid_fees, get_miss
 
 require_role([ROLE_ADMIN])
 
-render_header("Fees Pending")
+render_header("Pending")
 
 today = now_ist()
 current_month = today.month
 current_year = today.year
+
+def batch_pill(batch):
+    css_class = "batch-" + batch.lower().replace(" ", "-")
+    return f'<span class="batch-pill {css_class}">{batch}</span>'
 
 tab_salary, tab_fees, tab_missed = st.tabs([
     "Coach Salary Pending",
@@ -42,28 +46,31 @@ with tab_salary:
         if col_no.button("Cancel", key=f"salary_no_{coach['id']}", use_container_width=True):
             st.rerun()
 
-    with st.container(border=True):
-        st.markdown("**Coach Salary Pending**")
+    with st.container(border=True, key="card_salary_pending"):
 
         col_widths = [0.4, 0.3, 0.3]
-        header_cols = st.columns(col_widths)
-        header_cols[0].markdown("**Name**")
-        header_cols[1].markdown("**Salary**")
 
         if not coaches:
             st.info("No coaches added yet.")
         else:
-            for coach in coaches:
-                row_cols = st.columns(col_widths)
-                row_cols[0].markdown(coach['name'])
-                row_cols[1].markdown(f"₹{coach['salary']}")
+            with st.container(key="table_salary_pending"):
+                with st.container(key="theader_salary_pending"):
+                    header_cols = st.columns(col_widths)
+                    header_cols[0].markdown('<span class="table-header">Name</span>', unsafe_allow_html=True)
+                    header_cols[1].markdown('<span class="table-header">Salary</span>', unsafe_allow_html=True)
+                    header_cols[2].markdown('<span class="table-header">Status</span>', unsafe_allow_html=True)
 
-                paid = get_salary_status(coach['id'], current_month, current_year)
-                if paid:
-                    row_cols[2].markdown("✅ Paid")
-                else:
-                    if row_cols[2].button("Mark Paid", key=f"mark_salary_{coach['id']}"):
-                        confirm_salary_paid(coach)
+                for coach in coaches:
+                    row_cols = st.columns(col_widths)
+                    row_cols[0].markdown(coach['name'])
+                    row_cols[1].markdown(f"₹{coach['salary']}")
+
+                    paid = get_salary_status(coach['id'], current_month, current_year)
+                    if paid:
+                        row_cols[2].markdown('<span class="status-paid">Paid</span>', unsafe_allow_html=True)
+                    else:
+                        if row_cols[2].button("Mark Paid", key=f"btn_markpaid_salary_{coach['id']}"):
+                            confirm_salary_paid(coach)
 
 with tab_fees:
     from datetime import date as date_cls
@@ -84,7 +91,7 @@ with tab_fees:
     if search_fees:
         pending_fees = [p for p in pending_fees if search_fees.lower() in p['name'].lower()]
         paid_fees = [p for p in paid_fees if search_fees.lower() in p['name'].lower()]
-
+        
     @st.dialog("Confirm Payment")
     def confirm_fee_paid(p):
         st.write(f"Mark **{p['name']}**'s fee as paid for {calendar.month_name[current_month]} {current_year}?")
@@ -103,41 +110,46 @@ with tab_fees:
         if col_no.button("Cancel", key=f"fee_paid_no_{p['payer_type']}_{p['payer_id']}", use_container_width=True):
             st.rerun()
 
-    with st.container(border=True):
-        st.markdown("**Fees Pending**")
-
+    with st.container(border=True, key="card_fees_pending"):
         col_widths = [0.35, 0.2, 0.2, 0.25]
-        header_cols = st.columns(col_widths)
-        header_cols[0].markdown("**Name**")
-        header_cols[1].markdown("**Batch**")
-        header_cols[2].markdown("**Amount**")
 
         if not pending_fees and not paid_fees:
             st.info("No fee records for this month.")
         else:
-            # Not-paid rows first
-            for p in pending_fees:
-                row_cols = st.columns(col_widths)
-                name_display = f"**{p['name']}**"
-                if show_highlight:
-                    name_display = f"🔴 {name_display}"
-                row_cols[0].markdown(name_display)
-                row_cols[1].markdown(p['batch'])
-                row_cols[2].markdown(f"₹{p['amount']}")
+            with st.container(key="table_fees_pending"):
+                with st.container(key="theader_fees_pending"):
+                    header_cols = st.columns(col_widths)
+                    header_cols[0].markdown('<span class="table-header">Name</span>', unsafe_allow_html=True)
+                    header_cols[1].markdown('<span class="table-header">Batch</span>', unsafe_allow_html=True)
+                    header_cols[2].markdown('<span class="table-header">Amount</span>', unsafe_allow_html=True)
+                    header_cols[3].markdown('<span class="table-header">Action</span>', unsafe_allow_html=True)
 
-                if row_cols[3].button("Mark Paid", key=f"mark_fee_{p['payer_type']}_{p['payer_id']}"):
-                    confirm_fee_paid(p)
+                # Not-paid rows first
+                for p in pending_fees:
+                    row_cols = st.columns(col_widths)
+                    name_display = p['name']
+                    if show_highlight:
+                        name_display = f"🔴 {name_display}"
+                    row_cols[0].markdown(name_display)
+                    row_cols[1].markdown(batch_pill(p['batch']), unsafe_allow_html=True)
+                    row_cols[2].markdown(f"₹{p['amount']}")
 
-            # Paid rows after, struck through
-            for p in paid_fees:
-                row_cols = st.columns(col_widths)
-                row_cols[0].markdown(f"~~{p['name']}~~")
-                row_cols[1].markdown(p['batch'])
-                row_cols[2].markdown(f"₹{p['amount']}")
+                    if row_cols[3].button("Mark Paid", key=f"btn_markpaid_fee_{p['payer_type']}_{p['payer_id']}"):
+                        confirm_fee_paid(p)
 
-                paid_on_display = date_cls.fromisoformat(p['paid_on']).strftime("%d/%m")
-                marked_by_display = p['marked_by'].capitalize()
-                row_cols[3].markdown(f"Paid by {marked_by_display} on {paid_on_display}")
+                # Paid rows after, struck through
+                for p in paid_fees:
+                    row_cols = st.columns(col_widths)
+                    row_cols[0].markdown(f"~~{p['name']}~~")
+                    row_cols[1].markdown(batch_pill(p['batch']), unsafe_allow_html=True)
+                    row_cols[2].markdown(f"₹{p['amount']}")
+
+                    paid_on_display = date_cls.fromisoformat(p['paid_on']).strftime("%d/%m")
+                    marked_by_display = p['marked_by'].capitalize()
+                    row_cols[3].markdown(
+                        f'<span class="status-paid">Paid by {marked_by_display} on {paid_on_display}</span>',
+                        unsafe_allow_html=True
+                    )
 
 with tab_missed:
     from db.students import delete_student
@@ -188,23 +200,27 @@ with tab_missed:
         if col_cancel.button("Cancel", key=f"missed_cancel_{p['payer_type']}_{p['payer_id']}", use_container_width=True):
             st.rerun()
 
-    with st.container(border=True):
-        st.markdown(f"**Students Missed Last Month** ({calendar.month_name[missed_month]} {missed_year})")
+    with st.container(border=True, key="card_missed_last_month"):
+        st.markdown(f'<span class="card-subheading">{calendar.month_name[missed_month]} {missed_year}</span>', unsafe_allow_html=True)
 
         col_widths = [0.35, 0.2, 0.2, 0.25]
-        header_cols = st.columns(col_widths)
-        header_cols[0].markdown("**Name**")
-        header_cols[1].markdown("**Type**")
-        header_cols[2].markdown("**Amount**")
 
         if not missed_list:
             st.info("No one missed last month's payment.")
         else:
-            for p in missed_list:
-                row_cols = st.columns(col_widths)
-                row_cols[0].markdown(p['name'])
-                row_cols[1].markdown(p['payer_type'].capitalize())
-                row_cols[2].markdown(f"₹{p['amount']}")
+            with st.container(key="table_missed_last_month"):
+                with st.container(key="theader_missed_last_month"):
+                    header_cols = st.columns(col_widths)
+                    header_cols[0].markdown('<span class="table-header">Name</span>', unsafe_allow_html=True)
+                    header_cols[1].markdown('<span class="table-header">Batch</span>', unsafe_allow_html=True)
+                    header_cols[2].markdown('<span class="table-header">Amount</span>', unsafe_allow_html=True)
+                    header_cols[3].markdown('<span class="table-header">Action</span>', unsafe_allow_html=True)
 
-                if row_cols[3].button("Take Action", key=f"missed_action_{p['payer_type']}_{p['payer_id']}"):
-                    take_action_missed(p)
+                for p in missed_list:
+                    row_cols = st.columns(col_widths)
+                    row_cols[0].markdown(p['name'])
+                    row_cols[1].markdown(batch_pill(p['batch']), unsafe_allow_html=True)
+                    row_cols[2].markdown(f"₹{p['amount']}")
+
+                    if row_cols[3].button("Take Action", key=f"btn_takeaction_{p['payer_type']}_{p['payer_id']}"):
+                        take_action_missed(p)

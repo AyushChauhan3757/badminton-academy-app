@@ -1,8 +1,18 @@
 import streamlit as st
 
+
+# =============================================================================
+# apply_theme()
+# Entry point — called once per page (from app.py). Injects the global/base
+# CSS directly, then calls each specialized styling function in turn.
+# =============================================================================
+
 def apply_theme():
     st.markdown("""
         <style>
+        /* ---------------------------------------------------------------
+           FONTS
+        --------------------------------------------------------------- */
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block');
 
@@ -10,17 +20,22 @@ def apply_theme():
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
+        /* ---------------------------------------------------------------
+           GLOBAL PAGE LAYOUT
+        --------------------------------------------------------------- */
         .block-container {
             padding-top: 0rem !important;
         }
         [data-testid="stAppViewContainer"] .block-container > div:first-child {
             margin-top: 0 !important;
         }
-
         [data-testid="stAppViewContainer"] h1 {
             font-size: 3.2rem !important;
         }
 
+        /* ---------------------------------------------------------------
+           SIDEBAR — logo sizing/centering
+        --------------------------------------------------------------- */
         [data-testid="stSidebar"] [data-testid="stLogo"] {
             height: 16rem !important;
         }
@@ -37,19 +52,18 @@ def apply_theme():
             padding-bottom: 0 !important;
             display: flex !important;
             justify-content: center !important;
-        }
-
-        [data-testid="stSidebarHeader"] {
             margin-bottom: -2rem !important;
         }
         section[data-testid="stSidebar"] div[data-testid="stSidebarUserContent"] {
             padding-top: 0 !important;
         }
 
+        /* ---------------------------------------------------------------
+           SIDEBAR — background + nav links
+        --------------------------------------------------------------- */
         section[data-testid="stSidebar"] {
             background-color: #14304F;
         }
-
         section[data-testid="stSidebar"] a {
             color: #EEF3F9 !important;
             border-radius: 8px;
@@ -62,18 +76,19 @@ def apply_theme():
         section[data-testid="stSidebar"] a p {
             font-size: 1.25rem !important;
         }
-
         section[data-testid="stSidebar"] a[aria-current="page"] {
             background-color: #E0AC4B !important;
             color: #14304F !important;
             font-weight: 700;
         }
-
-        section[data-testid="stSidebar"] p, 
+        section[data-testid="stSidebar"] p,
         section[data-testid="stSidebar"] span {
             color: #EEF3F9;
         }
 
+        /* ---------------------------------------------------------------
+           SIDEBAR — buttons (Logout, etc.)
+        --------------------------------------------------------------- */
         section[data-testid="stSidebar"] button {
             background-color: #FFFFFF !important;
             border: none !important;
@@ -90,10 +105,17 @@ def apply_theme():
             color: #14304F !important;
         }
 
+        /* ---------------------------------------------------------------
+           SIDEBAR — collapse button (hidden entirely, not restyled —
+           see build log Entry 26) + logo-as-link on non-home pages
+           (Entry 27/28: Streamlit swaps the plain <img> logo for a
+           <button data-testid="stLogoLink"> on every page except the
+           current session's home page, which the general sidebar-button
+           rule above was painting white — these two rules undo that)
+        --------------------------------------------------------------- */
         div[data-testid="stSidebarCollapseButton"] {
             display: none !important;
         }
-
         [data-testid="stSidebarHeader"] button[data-testid="stLogoLink"] {
             background-color: transparent !important;
             border: none !important;
@@ -104,10 +126,20 @@ def apply_theme():
             background-color: transparent !important;
         }
 
+        /* ---------------------------------------------------------------
+           TOP HEADER BAR — hide the small logo icon that appears here
+           when the sidebar is collapsed (Entry 27/28)
+        --------------------------------------------------------------- */
         [data-testid="stHeader"] [data-testid="stHeaderLogo"] {
             display: none !important;
         }
 
+        /* ---------------------------------------------------------------
+           LEGACY generic bordered-container rule. Superseded in practice
+           by the explicit kpi_/card_ key-based rules below (Entry 28+),
+           but left in place as a fallback for any st.container(border=True)
+           that doesn't yet have a dedicated key.
+        --------------------------------------------------------------- */
         div[data-testid="stVerticalBlockBorderWrapper"] {
             background-color: #FFFFFF !important;
             border: 1px solid #E5EAF1 !important;
@@ -115,16 +147,66 @@ def apply_theme():
             box-shadow: 0 2px 8px rgba(20, 48, 79, 0.06) !important;
             padding: 1rem !important;
         }
+        /* ---------------------------------------------------------------
+           PAGE HEADER (title / Welcome+time / Logout, via
+           utils/header.py's render_header()) — mobile only.
+           Desktop keeps the existing single-row 3-column layout
+           untouched; on mobile, title stays on its own full-width
+           line, but Welcome+time and Logout are forced back into one
+           shared row (Welcome left, Logout right) instead of each
+           stacking as separate full-width rows.
+        --------------------------------------------------------------- */
+        @media (max-width: 640px) {
+            div[class*="st-key-page_header"] [data-testid="stHorizontalBlock"] {
+                display: flex !important;
+                flex-direction: row !important;
+                flex-wrap: wrap !important;
+                align-items: center !important;
+            }
+            div[class*="st-key-page_header"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(1),
+            div[class*="st-key-page_header"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:nth-child(1) {
+                flex: 1 1 100% !important;
+                width: 100% !important;
+            }
+            div[class*="st-key-page_header"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2),
+            div[class*="st-key-page_header"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:nth-child(2) {
+                flex: 1 1 65% !important;
+                max-width: 65% !important;
+                min-width: 0 !important;
+                width: auto !important;
+            }
+            div[class*="st-key-page_header"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(3),
+            div[class*="st-key-page_header"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:nth-child(3) {
+                flex: 0 0 auto !important;
+                width: auto !important;
+                min-width: 0 !important;
+            }
+            .header-welcome-block {
+                text-align: left !important;
+                padding-top: 0 !important;
+            }
+        }
         </style>
     """, unsafe_allow_html=True)
 
     apply_kpi_card_styles()
     apply_table_card_styles()
+    apply_tab_styles()
 
+
+# =============================================================================
+# apply_kpi_card_styles()
+# Styles any st.container(border=True, key="kpi_...") — small metric cards
+# with an icon-left / label-value-right layout (Overview page KPI rows).
+# Includes the desktop 3-across layout and the paired mobile layout.
+# =============================================================================
 
 def apply_kpi_card_styles():
     st.markdown("""
     <style>
+    /* ---------------------------------------------------------------
+       KPI CARD — base shape (desktop + mobile)
+    --------------------------------------------------------------- */
     div[class*="st-key-kpi_"] {
         background-color: #FFFFFF;
         border-radius: 14px;
@@ -177,10 +259,12 @@ def apply_kpi_card_styles():
         width: 100%;
     }
 
-    /* Color-coded card backgrounds by metric type - matched by key substring so
-       this covers both the desktop cards (kpi_lifetime_received, kpi_month_paid,
-       etc.) and the mobile cards (kpi_m_received_life, kpi_m_paid_month, etc.)
-       with one set of rules. */
+    /* ---------------------------------------------------------------
+       KPI CARD — color-coded backgrounds by metric type, matched by
+       key substring so this covers both desktop cards
+       (kpi_lifetime_received, kpi_month_paid, ...) and mobile cards
+       (kpi_m_received_life, kpi_m_paid_month, ...) with one rule set.
+    --------------------------------------------------------------- */
     div[class*="st-key-kpi_"][class*="_received"] {
         background-color: #EAF1FB !important;
     }
@@ -191,17 +275,19 @@ def apply_kpi_card_styles():
         background-color: #E3F5EA !important;
     }
 
-    /* Desktop: keep the existing 3+3 Lifetime/This Month layout, hide the paired mobile version */
+    /* ---------------------------------------------------------------
+       KPI CARD — desktop vs mobile layout swap.
+       Desktop: keep the 3+3 Lifetime/This Month rows, hide the mobile
+       paired layout. Mobile: hide desktop rows, show the paired
+       Lifetime/This Month layout instead (flex-direction must be
+       forced back to row — Streamlit's own mobile CSS switches
+       horizontal blocks to column layout by default under 640px).
+    --------------------------------------------------------------- */
     @media (min-width: 641px) {
         div[class*="st-key-kpi_section_mobile"] {
             display: none !important;
         }
     }
-
-    /* Mobile: hide the desktop 3+3 layout, show the paired Lifetime/This Month
-       version instead (Received|Received, Paid|Paid, Profit|Profit rows).
-       flex-direction must be forced back to row here because Streamlit's own
-       mobile CSS switches these horizontal blocks to column layout by default. */
     @media (max-width: 640px) {
         div[class*="st-key-kpi_"] .kpi-icon {
             display: none !important;
@@ -225,10 +311,12 @@ def apply_kpi_card_styles():
         }
     }
 
-    /* Dedicated classes for mobile KPI cards - defined outside the media query
-       (the section itself is already hidden on desktop via display:none above,
-       so no need to re-scope by width) to avoid any cascade/specificity fight
-       with the desktop .kpi-value/.kpi-label rules. */
+    /* ---------------------------------------------------------------
+       KPI CARD — dedicated mobile-only text classes. Defined outside
+       the media query (the section itself is already display:none'd
+       on desktop above) to avoid any cascade/specificity fight with
+       the desktop .kpi-value/.kpi-label rules.
+    --------------------------------------------------------------- */
     .kpi-value-mobile {
         font-size: 1.15rem;
         font-weight: 800;
@@ -246,9 +334,22 @@ def apply_kpi_card_styles():
     </style>
     """, unsafe_allow_html=True)
 
+
+# =============================================================================
+# apply_table_card_styles()
+# Styles any st.container(border=True, key="card_...") — larger table/list
+# panels — plus the nested "table_" (rows) and "theader_" (header row)
+# containers used inside them, and the small reusable text/pill/button
+# helper classes (.table-header, .status-*, .batch-*, .card-subheading,
+# btn_markpaid_/btn_takeaction_ buttons).
+# =============================================================================
+
 def apply_table_card_styles():
     st.markdown("""
     <style>
+    /* ---------------------------------------------------------------
+       CARD — outer panel shape
+    --------------------------------------------------------------- */
     div[class*="st-key-card_"] {
         background-color: #FFFFFF;
         border-radius: 16px;
@@ -257,6 +358,11 @@ def apply_table_card_styles():
         border: 1px solid #E5EAF1 !important;
     }
 
+    /* ---------------------------------------------------------------
+       TEXT HELPERS — column headers, status labels, small subheading
+       used above a table inside a card (e.g. "August 2026" on the
+       Missed Last Month tab)
+    --------------------------------------------------------------- */
     .table-header {
         font-size: 1rem;
         font-weight: 800;
@@ -264,10 +370,126 @@ def apply_table_card_styles():
         text-transform: uppercase;
         letter-spacing: 0.03em;
     }
+    .card-subheading {
+        display: block;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #14304F;
+        margin-bottom: 0.5rem;
+    }
+    .status-paid {
+        color: #22A06B;
+        font-weight: 700;
+    }
+    .status-pending {
+        color: #E0524A;
+        font-weight: 700;
+    }
 
-    /* Kill default gap on the vertical wrapper around each column's content
-    inside the card - this was pushing "View Full Log" down and out of
-    alignment with "+ Add Transaction" next to it. */
+    /* ---------------------------------------------------------------
+       BATCH / TYPE PILLS — used on Fees Pending & Missed Last Month
+       tables to color-code a student's batch (or "Gym"/"Student")
+    --------------------------------------------------------------- */
+    .batch-pill {
+        display: inline-block;
+        padding: 0.25rem 0.9rem;
+        border-radius: 20px;
+        font-size: 0.95rem;
+        font-weight: 700;
+    }
+    .batch-beginner {
+        background-color: #EAF1FB;
+        color: #1D4C82;
+    }
+    .batch-advanced-1 {
+        background-color: #FBF0DC;
+        color: #A9711B;
+    }
+    .batch-advanced-2 {
+        background-color: #F3E8FB;
+        color: #7B3FA0;
+    }
+    .batch-gym {
+        background-color: #E3F5EA;
+        color: #22A06B;
+    }
+    .batch-student {
+        background-color: #FDEEDC;
+        color: #B4530A;
+    }
+
+    /* ---------------------------------------------------------------
+       ROW-ACTION BUTTONS — "Mark Paid" (red outline — represents an
+       outstanding payment) and "Take Action" (neutral — may resolve
+       to a payment OR a delete on the Missed Last Month tab). Both
+       are centered within their table cell.
+    --------------------------------------------------------------- */
+    div[class*="st-key-btn_markpaid_"] {
+        display: flex !important;
+        justify-content: center !important;
+        width: 100% !important;
+    }
+    div[class*="st-key-btn_markpaid_"] button {
+        background-color: transparent !important;
+        border: 1px solid #E0524A !important;
+        border-radius: 8px !important;
+    }
+    div[class*="st-key-btn_markpaid_"] button p {
+        color: #E0524A !important;
+        font-weight: 700 !important;
+    }
+    div[class*="st-key-btn_markpaid_"] button:hover {
+        background-color: #FBE7E6 !important;
+    }
+
+    div[class*="st-key-btn_takeaction_"] {
+        display: flex !important;
+        justify-content: center !important;
+        width: 100% !important;
+    }
+
+    /* ---------------------------------------------------------------
+       "+ Add Transaction" button (Overview page)
+    --------------------------------------------------------------- */
+    .st-key-btn_add_transaction button {
+        background-color: #14304F !important;
+        color: #FFFFFF !important;
+        border: none !important;
+        border-radius: 10px !important;
+        padding: 0.7rem 3rem !important;
+        font-weight: 600 !important;
+        width: 360px !important;
+        max-width: 100% !important;
+    }
+    .st-key-btn_add_transaction button p {
+        color: #FFFFFF !important;
+        font-size: 1.05rem !important;
+    }
+    .st-key-btn_add_transaction button:hover {
+        background-color: #1D4C82 !important;
+    }
+
+    /* ---------------------------------------------------------------
+       "View Full Log" page-link (Overview page) — div.stPageLink a is
+       the confirmed-correct selector (Entry 33); earlier
+       stPageLink-NavLink/kind="secondary" guesses never matched.
+    --------------------------------------------------------------- */
+    div[class*="st-key-card_"] div.stPageLink a {
+        justify-content: center !important;
+        text-decoration: none !important;
+    }
+    div[class*="st-key-card_"] div.stPageLink a,
+    div[class*="st-key-card_"] div.stPageLink a * {
+        color: #14304F !important;
+        font-weight: 700 !important;
+        font-size: 1.15rem !important;
+    }
+
+    /* ---------------------------------------------------------------
+       CARD — kill default Streamlit gaps so button/link rows inside
+       a card line up cleanly (e.g. "+ Add Transaction" / "View Full
+       Log →" sitting on the same row, Entry 33)
+    --------------------------------------------------------------- */
     div[class*="st-key-card_"] [data-testid="stHorizontalBlock"] > div[data-testid="column"] > div[data-testid="stVerticalBlock"],
     div[class*="st-key-card_"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] > div[data-testid="stVerticalBlock"] {
         gap: 0 !important;
@@ -277,6 +499,13 @@ def apply_table_card_styles():
         gap: 0 !important;
     }
 
+    /* ---------------------------------------------------------------
+       TABLE ROWS — the "table_" container wraps just the header +
+       data rows inside a card, so border/divider/centering CSS stays
+       scoped to actual rows without leaking onto sibling buttons/links
+       that share the same outer "card_" panel (three-tier nesting
+       pattern: card_ > table_ > theader_, Entry 33).
+    --------------------------------------------------------------- */
     div[class*="st-key-table_"] [data-testid="stHorizontalBlock"] {
         margin-bottom: 0 !important;
         border-bottom: 1px solid #B9C4D3 !important;
@@ -296,7 +525,6 @@ def apply_table_card_styles():
         line-height: 1.6 !important;
         margin-bottom: 0 !important;
     }
-
     div[class*="st-key-table_"] [data-testid="stHorizontalBlock"] > div[data-testid="column"],
     div[class*="st-key-table_"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] {
         display: flex !important;
@@ -326,7 +554,7 @@ def apply_table_card_styles():
         overflow: hidden !important;
     }
 
-    /* Header row - darker divider lines than the data rows */
+    /* Header row — darker divider lines than the data rows */
     div[class*="st-key-theader_"] [data-testid="stHorizontalBlock"] {
         border-bottom: 2px solid #8FA0B8 !important;
     }
@@ -335,38 +563,11 @@ def apply_table_card_styles():
         border-right: 2px solid #8FA0B8 !important;
     }
 
-    .st-key-btn_add_transaction button {
-        background-color: #14304F !important;
-        color: #FFFFFF !important;
-        border: none !important;
-        border-radius: 10px !important;
-        padding: 0.7rem 3rem !important;
-        font-weight: 600 !important;
-        width: 360px !important;
-        max-width: 100% !important;
-    }
-    .st-key-btn_add_transaction button p {
-        color: #FFFFFF !important;
-        font-size: 1.05rem !important;
-    }
-    .st-key-btn_add_transaction button:hover {
-        background-color: #1D4C82 !important;
-    }
-
-    div[class*="st-key-card_"] div.stPageLink a {
-        justify-content: center !important;
-        text-decoration: none !important;
-    }
-    div[class*="st-key-card_"] div.stPageLink a,
-    div[class*="st-key-card_"] div.stPageLink a * {
-        color: #14304F !important;
-        font-weight: 700 !important;
-        font-size: 1.15rem !important;
-    }
-
-    /* Mobile: force table rows back to row-direction (Streamlit defaults to
-       column-stacking horizontal blocks under 640px) and shrink text/padding
-       so all 4 columns can fit side by side on a phone screen. */
+    /* ---------------------------------------------------------------
+       MOBILE — force table rows back to row-direction (Streamlit
+       defaults to column-stacking horizontal blocks under 640px) and
+       shrink text/padding so all columns fit side by side on a phone.
+    --------------------------------------------------------------- */
     @media (max-width: 640px) {
         div[class*="st-key-table_"] [data-testid="stHorizontalBlock"] {
             flex-direction: row !important;
@@ -385,9 +586,130 @@ def apply_table_card_styles():
             line-height: 1.25 !important;
             word-break: break-word !important;
         }
+        .batch-pill {
+            font-size: 0.62rem !important;
+            padding: 0.15rem 0.5rem !important;
+            white-space: normal !important;
+            word-break: normal !important;
+            overflow-wrap: break-word !important;
+        }
+        div[class*="st-key-btn_markpaid_"] button,
+        div[class*="st-key-btn_takeaction_"] button {
+            font-size: 0.62rem !important;
+            padding: 0.3rem 0.4rem !important;
+            white-space: normal !important;
+            line-height: 1.15 !important;
+        }
+        div[class*="st-key-btn_markpaid_"] button p,
+        div[class*="st-key-btn_takeaction_"] button p {
+            white-space: normal !important;
+            font-size: 0.62rem !important;
+        }
+        div[class*="st-key-table_"] [data-testid="stHorizontalBlock"] {
+            min-height: 3.4rem !important;
+        }
     }
     </style>
     """, unsafe_allow_html=True)
+
+
+# =============================================================================
+# apply_tab_styles()
+# Styles st.tabs() — full-width, equally-divided segmented-button tab bar
+# (Coach Salary Pending / Fees Pending / Students Missed Last Month, and
+# any future st.tabs() usage elsewhere in the app).
+# =============================================================================
+
+def apply_tab_styles():
+    st.markdown("""
+    <style>
+    /* Kill default underline/border chrome around the tab list itself
+       (this Streamlit version uses react-aria-components, not baseweb —
+       real selectors confirmed via DevTools, see build log Entry 34+) */
+    div[data-testid="stTabs"] div[data-rac][data-orientation="horizontal"] {
+        border-bottom: none !important;
+        box-shadow: none !important;
+    }
+    div[data-testid="stTabs"] > div {
+        border-bottom: none !important;
+        box-shadow: none !important;
+    }
+
+    /* The tab-list track — full width, equal 3-way flex split, light
+       background so the active pill stands out against it */
+    div[data-testid="stTabs"] [role="tablist"] {
+        display: flex !important;
+        width: 100% !important;
+        gap: 0.4rem !important;
+        background-color: #EEF3F9 !important;
+        border-radius: 12px !important;
+        padding: 6px !important;
+        border-bottom: none !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    /* Each individual tab */
+    div[data-testid="stTab"] {
+        flex: 1 1 0 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        background-color: transparent !important;
+        border-radius: 9px !important;
+        padding: 0.7rem 1rem !important;
+    }
+    div[data-testid="stTab"],
+    div[data-testid="stTab"] p,
+    div[data-testid="stTab"] span {
+        font-size: 1.05rem !important;
+        font-weight: 600 !important;
+        color: #14304F !important;
+    }
+    div[data-testid="stTab"][aria-selected="true"] {
+        background-color: #14304F !important;
+    }
+    div[data-testid="stTab"][aria-selected="true"] p,
+    div[data-testid="stTab"][aria-selected="true"] span {
+        color: #FFFFFF !important;
+    }
+
+    /* Hide react-aria's own underline-indicator element — a solid pill
+       fill (above) replaces it, so no separate indicator is needed */
+    [data-testid="stTabHighlight"] {
+        display: none !important;
+    }
+    .react-aria-SelectionIndicator {
+        display: none !important;
+    }
+    @media (max-width: 640px) {
+        div[data-testid="stTabs"] [role="tablist"] {
+            overflow-x: hidden !important;
+            flex-wrap: nowrap !important;
+        }
+        div[data-testid="stTab"] {
+            flex: 1 1 0 !important;
+            min-width: 0 !important;
+            padding: 0.5rem 0.2rem !important;
+        }
+        div[data-testid="stTab"],
+        div[data-testid="stTab"] p,
+        div[data-testid="stTab"] span {
+            font-size: 0.7rem !important;
+            white-space: normal !important;
+            line-height: 1.15 !important;
+            text-align: center !important;
+        }
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+
+# =============================================================================
+# apply_login_styles()
+# Login page only — full-bleed background image with a frosted-glass
+# left-positioned form card. Called from the login screen, not apply_theme().
+# =============================================================================
 
 def apply_login_styles():
     st.markdown("""
@@ -407,6 +729,9 @@ def apply_login_styles():
             max-width: 100% !important;
         }
 
+        /* Full-viewport background image container (position: fixed with
+           explicit 100vw/100vh — NOT position: relative + min-height,
+           which caused a white-border clipping bug, see Entry 30) */
         .st-key-login_page {
             position: fixed !important;
             top: 0 !important;
@@ -421,6 +746,7 @@ def apply_login_styles():
             z-index: 9999 !important;
         }
 
+        /* Frosted-glass form card, left-positioned, vertically centered */
         .st-key-login_form_panel {
             position: absolute !important;
             top: 50% !important;
@@ -455,6 +781,8 @@ def apply_login_styles():
             width: 100% !important;
         }
 
+        /* Form field styling — react-aria-components selectbox, not
+           baseweb (see Entry 29) */
         div[data-testid="stSelectbox"] > div {
             border: 1px solid #D0D7E2 !important;
             border-radius: 10px !important;
@@ -463,7 +791,6 @@ def apply_login_styles():
         div[data-testid="stSelectbox"] [data-rac] {
             background-color: transparent !important;
         }
-
         div[data-testid="stTextInput"] > div {
             border: 1px solid #D0D7E2 !important;
             border-radius: 10px !important;
@@ -502,6 +829,12 @@ def apply_login_styles():
             font-weight: 700;
         }
 
+        /* Mobile — solid navy background instead of the image, card
+           becomes a normal in-flow block instead of absolutely
+           positioned. position: absolute (not the base rule's fixed)
+           lets the page grow past 100vh and scroll — see Entry 31's
+           scroll-trap fix; do not remove without re-testing on a real
+           narrow device. */
         @media (max-width: 640px) {
             .st-key-login_page {
                 position: absolute !important;

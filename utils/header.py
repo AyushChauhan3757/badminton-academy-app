@@ -9,7 +9,8 @@ def render_header(title):
     all in a single row. Call this at the top of every page file
     instead of st.title(...).
     """
-    col_title, col_welcome, col_logout = st.columns([5, 3, 1])
+    header_row = st.container(key="page_header")
+    col_title, col_welcome, col_logout = header_row.columns([5, 3, 1])
 
     with col_title:
         st.title(title)
@@ -17,7 +18,7 @@ def render_header(title):
     with col_welcome:
         st.markdown(
             f"""
-            <div style="text-align:right; padding-top:1.6rem;">
+            <div class="header-welcome-block" style="text-align:right; padding-top:1.6rem;">
                 <span style="font-weight:700; font-size:1.05rem; color:#14304F;">
                     Welcome, {st.session_state.role.capitalize()}
                 </span><br>
