@@ -6,10 +6,13 @@ from constants import BATCH_FEES, BATCH_TIMINGS, ROLE_ADMIN
 from db.students import add_student, delete_student, get_all_students, update_student
 from utils.auth import require_role
 from utils.header import render_header
+from utils.ui_helpers import batch_pill, timing_pill
 
 require_role([ROLE_ADMIN])
 
 render_header("Students Roster")
+
+PAGE_SIZE = 10
 
 
 @st.dialog("Add Student", width="large")
@@ -81,6 +84,24 @@ if admission_start:
 if admission_end:
     students = [s for s in students if date.fromisoformat(s["admission_date"]) <= admission_end]
 
+# Reset to page 1 whenever the active filter/search combination changes
+filter_signature = (search_name, batch_filter, timing_filter, admission_start, admission_end)
+if st.session_state.get("students_filter_signature") != filter_signature:
+    st.session_state["students_filter_signature"] = filter_signature
+    st.session_state["students_page"] = 1
+
+if "students_page" not in st.session_state:
+    st.session_state["students_page"] = 1
+
+total_students = len(students)
+total_pages = max(1, (total_students + PAGE_SIZE - 1) // PAGE_SIZE)
+st.session_state["students_page"] = min(st.session_state["students_page"], total_pages)
+current_page = st.session_state["students_page"]
+
+start_idx = (current_page - 1) * PAGE_SIZE
+end_idx = start_idx + PAGE_SIZE
+paginated_students = students[start_idx:end_idx]
+
 st.markdown("---")
 
 
@@ -148,25 +169,44 @@ def delete_student_dialog(student):
             st.rerun()
 
 
-if students:
-    col_widths = [2, 1.3, 1, 1.5, 1.3, 1.3, 0.8, 1, 1]
-    headers = ["Name", "Batch", "Timing", "Guardian Name", "Phone", "Admission Date", "Fees", "", ""]
-    header_cols = st.columns(col_widths)
-    for col, h in zip(header_cols, headers):
-        col.markdown(f"**{h}**")
+if paginated_students:
+    col_widths = [1.7, 1.1, 0.8, 1.5, 1.1, 1.1, 0.7, 0.8]
+    headers = ["Name", "Batch", "Timing", "Guardian Name", "Phone", "Admission Date", "Fees", "Actions"]
 
-    for s in students:
-        row_cols = st.columns(col_widths)
-        row_cols[0].write(s["name"])
-        row_cols[1].write(s["batch"])
-        row_cols[2].write(s["timing"])
-        row_cols[3].write(s["guardian_name"])
-        row_cols[4].write(s["phone"])
-        row_cols[5].write(s["admission_date"])
-        row_cols[6].write(s["fees"])
-        if row_cols[7].button("Edit", key=f"edit_{s['id']}"):
-            update_student_dialog(s)
-        if row_cols[8].button("Delete", key=f"delete_{s['id']}"):
-            delete_student_dialog(s)
+    with st.container(key="card_students_roster"):
+        with st.container(key="table_students_roster"):
+            with st.container(key="theader_students_roster"):
+                header_cols = st.columns(col_widths)
+                for col, h in zip(header_cols, headers):
+                    col.markdown(f'<span class="table-header">{h}</span>', unsafe_allow_html=True)
+
+            for s in paginated_students:
+                row_cols = st.columns(col_widths)
+                row_cols[0].markdown(s["name"])
+                row_cols[1].markdown(batch_pill(s["batch"]), unsafe_allow_html=True)
+                row_cols[2].markdown(timing_pill(s["timing"]), unsafe_allow_html=True)
+                row_cols[3].markdown(s["guardian_name"])
+                row_cols[4].markdown(s["phone"])
+                row_cols[5].markdown(s["admission_date"])
+                row_cols[6].markdown(f"₹{s['fees']}")
+                with row_cols[7]:
+                    action_cols = st.columns(2)
+                    if action_cols[0].button(":material/edit:", key=f"edit_{s['id']}"):
+                        update_student_dialog(s)
+                    if action_cols[1].button(":material/delete:", key=f"delete_{s['id']}"):
+                        delete_student_dialog(s)
+
+    st.markdown("---")
+    pcol1, pcol2, pcol3 = st.columns([1, 2, 1])
+    with pcol1:
+        if st.button("Previous", key="students_prev_page", disabled=(current_page <= 1)):
+            st.session_state["students_page"] = current_page - 1
+            st.rerun()
+    with pcol2:
+        st.markdown(f"<div style='text-align:center;'>Page {current_page} of {total_pages}</div>", unsafe_allow_html=True)
+    with pcol3:
+        if st.button("Next", key="students_next_page", disabled=(current_page >= total_pages)):
+            st.session_state["students_page"] = current_page + 1
+            st.rerun()
 else:
-    st.info("No students added yet.")
+    st.info("No students added yet." if total_students == 0 else "No students match the current filters.")

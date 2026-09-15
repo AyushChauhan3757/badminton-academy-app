@@ -4,6 +4,7 @@ from utils.auth import require_role, now_ist
 from constants import ROLE_ADMIN
 from utils.header import render_header
 from db.payments import get_pending_fees, mark_fee_paid, get_paid_fees, get_missed_last_month
+from utils.ui_helpers import batch_pill
 
 require_role([ROLE_ADMIN])
 
@@ -12,10 +13,6 @@ render_header("Pending")
 today = now_ist()
 current_month = today.month
 current_year = today.year
-
-def batch_pill(batch):
-    css_class = "batch-" + batch.lower().replace(" ", "-")
-    return f'<span class="batch-pill {css_class}">{batch}</span>'
 
 tab_salary, tab_fees, tab_missed = st.tabs([
     "Coach Salary Pending",

@@ -15,9 +15,19 @@ def apply_theme():
         --------------------------------------------------------------- */
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block');
+        @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block');
 
         html, body, [class*="css"] {
             font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        /* ---------------------------------------------------------------
+        Icon-only buttons (:material/... syntax) — must keep the
+        Material Symbols ligature font; the global Plus Jakarta Sans
+        override above otherwise breaks the icon glyph rendering.
+        --------------------------------------------------------------- */
+        span[data-testid="stIconMaterial"] {
+            font-family: 'Material Symbols Outlined' !important;
         }
 
         /* ---------------------------------------------------------------
@@ -31,6 +41,19 @@ def apply_theme():
         }
         [data-testid="stAppViewContainer"] h1 {
             font-size: 3.2rem !important;
+        }
+
+        /* ---------------------------------------------------------------
+        ICON BUTTONS — Streamlit's in-button Material icon syntax
+        (:material/edit:, :material/delete:, etc.) renders as
+        <span role="img" aria-label="... icon">, using font
+        "Material Symbols Rounded" inline — this font was never
+        imported, so the ligature silently failed to render.
+        --------------------------------------------------------------- */
+        span[role="img"][translate="no"] {
+            font-family: 'Material Symbols Rounded' !important;
+            font-size: 1.3rem !important;
+            color: #14304F !important;
         }
 
         /* ---------------------------------------------------------------
@@ -418,6 +441,22 @@ def apply_table_card_styles():
         background-color: #FDEEDC;
         color: #B4530A;
     }
+    .timing-4-5 {
+        background-color: #E9F7F6;
+        color: #0E7C86;
+    }
+    .timing-5-6 {
+        background-color: #FDEEDC;
+        color: #B4530A;
+    }
+    .timing-6-7 {
+        background-color: #F3E8FB;
+        color: #7B3FA0;
+    }
+    .timing-4-6 {
+        background-color: #EAF1FB;
+        color: #1D4C82;
+    }
 
     /* ---------------------------------------------------------------
        ROW-ACTION BUTTONS — "Mark Paid" (red outline — represents an
@@ -513,26 +552,35 @@ def apply_table_card_styles():
         align-items: stretch !important;
         gap: 0 !important;
     }
-    div[class*="st-key-table_"] [data-testid="stHorizontalBlock"] [data-testid="stElementContainer"] {
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-    div[class*="st-key-table_"] [data-testid="stHorizontalBlock"] [data-testid="stMarkdownContainer"] {
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-    div[class*="st-key-table_"] p {
-        font-size: 1.15rem !important;
-        line-height: 1.6 !important;
-        margin-bottom: 0 !important;
-    }
     div[class*="st-key-table_"] [data-testid="stHorizontalBlock"] > div[data-testid="column"],
     div[class*="st-key-table_"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] {
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
         border-right: 1px solid #B9C4D3 !important;
-        padding: 0.85rem 0.75rem !important;
+        padding: 0.45rem 0.75rem !important;
+    }
+    div[class*="st-key-table_"] [data-testid="stHorizontalBlock"] > div[data-testid="column"] > div[data-testid="stVerticalBlock"],
+    div[class*="st-key-table_"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] > div[data-testid="stVerticalBlock"] {
+        gap: 0 !important;
+        min-height: unset !important;
+        height: auto !important;
+        width: 100% !important;
+    }
+    div[class*="st-key-table_"] [data-testid="stHorizontalBlock"] [data-testid="stElementContainer"] {
+        margin: 0 !important;
+        padding: 0 !important;
+        height: auto !important;
+        min-height: unset !important;
+    }
+    div[class*="st-key-table_"] [data-testid="stHorizontalBlock"] [data-testid="stMarkdownContainer"] {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    div[class*="st-key-table_"] p {
+        font-size: 1.05rem !important;
+        line-height: 1.3 !important;
+        margin-bottom: 0 !important;
     }
     div[class*="st-key-table_"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:last-child,
     div[class*="st-key-table_"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:last-child {
@@ -546,6 +594,41 @@ def apply_table_card_styles():
     div[class*="st-key-table_"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] .table-header {
         text-align: center !important;
         width: 100%;
+    }
+
+    /* ---------------------------------------------------------------
+       BUTTONS INSIDE TABLE ROWS — Streamlit's own button wrapper
+       (.stButton) and the <button> itself carry default padding/
+       min-height that made button rows visibly taller than plain-
+       text rows; this collapses them down to match.
+    --------------------------------------------------------------- */
+    div[class*="st-key-table_"] .stButton {
+        min-height: unset !important;
+        height: auto !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 100% !important;
+    }
+    div[class*="st-key-table_"] .stButton button {
+        padding: 0.35rem 0.9rem !important;
+        line-height: 1.2 !important;
+        min-height: unset !important;
+        height: auto !important;
+    }
+    div[class*="st-key-table_"] button[data-testid^="stBaseButton"] {
+        min-height: unset !important;
+        height: 2.1rem !important;
+        padding: 0.3rem 0.9rem !important;
+        line-height: 1.2 !important;
+    }
+    div[class*="st-key-table_"] [data-testid="stHorizontalBlock"] [data-testid="stVerticalBlock"] {
+        height: auto !important;
+        min-height: unset !important;
+    }
+    div[class*="st-key-table_"] .stButton button p {
+        line-height: 1.2 !important;
+        margin: 0 !important;
     }
 
     /* Outer border around the whole table */
