@@ -191,9 +191,9 @@ if paginated_students:
                 row_cols[6].markdown(f"₹{s['fees']}")
                 with row_cols[7]:
                     action_cols = st.columns(2)
-                    if action_cols[0].button(":material/edit:", key=f"edit_{s['id']}"):
+                    if action_cols[0].button("Edit", key=f"edit_{s['id']}"):
                         update_student_dialog(s)
-                    if action_cols[1].button(":material/delete:", key=f"delete_{s['id']}"):
+                    if action_cols[1].button("Delete", key=f"delete_{s['id']}"):
                         delete_student_dialog(s)
 
     st.markdown("---")
