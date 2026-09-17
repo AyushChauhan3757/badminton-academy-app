@@ -55,6 +55,12 @@ def apply_theme():
             font-size: 1.3rem !important;
             color: #14304F !important;
         }
+        div[class*="st-key-edit_"] span[role="img"][translate="no"] {
+            color: #1D4C82 !important;
+        }
+        div[class*="st-key-delete_"] span[role="img"][translate="no"] {
+            color: #E0524A !important;
+        }
 
         /* ---------------------------------------------------------------
            SIDEBAR — logo sizing/centering
@@ -207,6 +213,12 @@ def apply_theme():
             .header-welcome-block {
                 text-align: left !important;
                 padding-top: 0 !important;
+            }
+        }
+        @media (max-width: 640px) {
+            .stApp, [data-testid="stAppViewContainer"], .block-container {
+                overflow-x: hidden !important;
+                max-width: 100vw !important;
             }
         }
         </style>
@@ -420,6 +432,7 @@ def apply_table_card_styles():
         border-radius: 20px;
         font-size: 0.95rem;
         font-weight: 700;
+        white-space: nowrap;
     }
     .batch-beginner {
         background-color: #EAF1FB;
@@ -474,9 +487,12 @@ def apply_table_card_styles():
         border: 1px solid #E0524A !important;
         border-radius: 8px !important;
     }
-    div[class*="st-key-btn_markpaid_"] button p {
-        color: #E0524A !important;
-        font-weight: 700 !important;
+    div[class*="st-key-btn_markpaid_"] button p,
+    div[class*="st-key-btn_takeaction_"] button p {
+        white-space: normal !important;
+        font-size: 0.62rem !important;
+        word-break: normal !important;
+        overflow-wrap: normal !important;
     }
     div[class*="st-key-btn_markpaid_"] button:hover {
         background-color: #FBE7E6 !important;
@@ -619,8 +635,31 @@ def apply_table_card_styles():
     div[class*="st-key-table_"] button[data-testid^="stBaseButton"] {
         min-height: unset !important;
         height: 2.1rem !important;
-        padding: 0.3rem 0.9rem !important;
+        width: 2.1rem !important;
+        padding: 0.3rem !important;
         line-height: 1.2 !important;
+        flex-shrink: 0 !important;
+        min-width: 34px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] [data-testid="stHorizontalBlock"] {
+        display: flex !important;
+        gap: 0.5rem !important;
+        flex-wrap: nowrap !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: auto !important;
+        border-bottom: none !important;
+    }
+    div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] [data-testid="stHorizontalBlock"] > div[data-testid="column"],
+    div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] {
+        flex: 0 0 auto !important;
+        width: auto !important;
+        min-width: 0 !important;
+        padding: 0 !important;
+        border-right: none !important;
     }
     div[class*="st-key-table_"] [data-testid="stHorizontalBlock"] [data-testid="stVerticalBlock"] {
         height: auto !important;
@@ -691,6 +730,129 @@ def apply_table_card_styles():
         }
         div[class*="st-key-table_"] [data-testid="stHorizontalBlock"] {
             min-height: 3.4rem !important;
+        }
+    }
+    /* ---------------------------------------------------------------
+       PAGINATION CONTROLS — Previous/Next + "Page X of Y", used
+       below any paginated table (Students Roster, and future
+       paginated tables)
+    --------------------------------------------------------------- */
+    div[class*="st-key-pagination_"] {
+        margin-top: 0.75rem !important;
+    }
+    div[class*="st-key-pagination_"] [data-testid="stHorizontalBlock"] {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 0.75rem !important;
+    }
+    div[class*="st-key-pagination_"] [data-testid="stHorizontalBlock"] > div[data-testid="column"],
+    div[class*="st-key-pagination_"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] {
+        flex: 0 0 auto !important;
+        width: auto !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    div[class*="st-key-pagination_"] button {
+        background-color: #1D4C82 !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        padding: 0.5rem 1.2rem !important;
+    }
+    div[class*="st-key-pagination_"] button p {
+        color: #FFFFFF !important;
+    }
+    div[class*="st-key-pagination_"] button:hover:not(:disabled) {
+        background-color: #14304F !important;
+    }
+    div[class*="st-key-pagination_"] button:disabled {
+        background-color: #D7E1EE !important;
+        opacity: 1 !important;
+    }
+    div[class*="st-key-pagination_"] button:disabled p {
+        color: #9AA6B5 !important;
+    }
+    .pagination-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        font-weight: 700;
+        color: #14304F;
+        font-size: 1.05rem;
+        white-space: nowrap;
+    }
+    /* ---------------------------------------------------------------
+       MOBILE — Students Roster table specifically: too many columns
+       to shrink-to-fit without mangling text, so give it a fixed
+       comfortable width and let the card scroll horizontally instead.
+    --------------------------------------------------------------- */
+    @media (max-width: 640px) {
+        div[class*="st-key-table_students_roster"] {
+            overflow-x: auto !important;
+            overflow-y: visible !important;
+            -webkit-overflow-scrolling: touch !important;
+        }
+        div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] {
+            flex-wrap: nowrap !important;
+            min-width: 900px !important;
+        }
+        div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] [data-testid="stHorizontalBlock"] {
+            min-width: 0 !important;
+            width: auto !important;
+            flex: 0 0 auto !important;
+        }
+        div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(1),
+        div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:nth-child(1) { flex: 0 0 160px !important; width: 160px !important; }
+        div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2),
+        div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:nth-child(2) { flex: 0 0 150px !important; width: 150px !important; }
+        div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(3),
+        div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:nth-child(3) { flex: 0 0 85px !important; width: 85px !important; }
+        div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(4),
+        div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:nth-child(4) { flex: 0 0 140px !important; width: 140px !important; }
+        div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(5),
+        div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:nth-child(5) { flex: 0 0 120px !important; width: 120px !important; }
+        div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(6),
+        div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:nth-child(6) { flex: 0 0 120px !important; width: 120px !important; }
+        div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(7),
+        div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:nth-child(7) { flex: 0 0 80px !important; width: 80px !important; }
+        div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(8),
+        div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:nth-child(8) { flex: 0 0 90px !important; width: 90px !important; }
+        div[class*="st-key-table_students_roster"] p,
+        div[class*="st-key-table_students_roster"] .table-header {
+            font-size: 0.8rem !important;
+            white-space: normal !important;
+        }
+        div[class*="st-key-table_students_roster"] .batch-pill {
+            white-space: nowrap !important;
+            font-size: 0.75rem !important;
+        }
+    }
+
+    /* ---------------------------------------------------------------
+       MOBILE — pagination row: Streamlit's default column-stacking
+       for horizontal blocks under 640px breaks the centered row and
+       stretches buttons full-width; force it back to a compact row.
+    --------------------------------------------------------------- */
+    @media (max-width: 640px) {
+        div[class*="st-key-pagination_"] [data-testid="stHorizontalBlock"] {
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+        }
+        div[class*="st-key-pagination_"] button {
+            padding: 0.45rem 0.9rem !important;
+            font-size: 0.85rem !important;
+        }
+    }
+    @media (max-width: 640px) {
+        .stApp,
+        [data-testid="stAppViewContainer"],
+        [data-testid="stMain"],
+        .block-container,
+        [data-testid="stVerticalBlock"] {
+            min-width: 0 !important;
         }
     }
     </style>
