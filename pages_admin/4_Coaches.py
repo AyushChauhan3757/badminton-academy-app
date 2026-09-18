@@ -1,16 +1,14 @@
 import streamlit as st
-from utils.auth import require_role
+
 from constants import ROLE_ADMIN
-from db.coaches import get_all_coaches, add_coach, update_coach, delete_coach
-from db.salary import get_salary_status, clear_coach_salary
+from db.coaches import add_coach, delete_coach, get_all_coaches, update_coach
+from utils.auth import require_role
 from utils.header import render_header
 
 require_role([ROLE_ADMIN])
 
 render_header("Coaches List")
 
-if st.button("+ Add Coach"):
-    st.session_state.show_add_coach = True
 
 @st.dialog("Add Coach")
 def add_coach_dialog():
@@ -18,16 +16,29 @@ def add_coach_dialog():
     phone = st.text_input("Phone")
     salary = st.number_input("Salary", min_value=0, step=500)
 
-    if st.button("Save"):
-        if not name:
+    if st.button("Add Coach", key="submit_add_coach"):
+        if not name.strip():
             st.error("Name is required.")
         else:
-            add_coach(name, phone, salary)
-            st.session_state.show_add_coach = False
+            add_coach(name.strip(), phone.strip(), salary)
+            st.success(f"{name} added.")
             st.rerun()
 
-if st.session_state.get("show_add_coach"):
-    add_coach_dialog()
+
+with st.container(key="students_top_row"):
+    col_search, col_add = st.columns([4, 1])
+    with col_search:
+        search_name = st.text_input("Search by name", placeholder="Search by name", label_visibility="collapsed")
+    with col_add:
+        if st.button("+ Add Coach", key="btn_add_coach", use_container_width=True):
+            add_coach_dialog()
+
+coaches = get_all_coaches()
+
+if search_name:
+    coaches = [c for c in coaches if search_name.lower() in c["name"].lower()]
+
+st.markdown("---")
 
 
 @st.dialog("Edit Coach")
@@ -36,75 +47,50 @@ def edit_coach_dialog(coach):
     phone = st.text_input("Phone", value=coach["phone"])
     salary = st.number_input("Salary", min_value=0, step=500, value=coach["salary"])
 
-    if st.button("Save Changes"):
-        if not name:
+    if st.button("Save Changes", key="submit_update_coach"):
+        if not name.strip():
             st.error("Name is required.")
         else:
-            update_coach(coach["id"], name, phone, salary)
-            st.session_state.edit_coach_id = None
+            update_coach(coach["id"], name.strip(), phone.strip(), salary)
+            st.success(f"{name} updated.")
             st.rerun()
 
 
 @st.dialog("Delete Coach")
 def delete_coach_dialog(coach):
-    st.write(f"Are you sure you want to delete **{coach['name']}**?")
+    st.warning(f"Are you sure you want to delete **{coach['name']}**? This cannot be undone.")
     col1, col2 = st.columns(2)
-    if col1.button("Yes, Delete"):
-        delete_coach(coach["id"])
-        st.session_state.delete_coach_id = None
-        st.rerun()
-    if col2.button("Cancel"):
-        st.session_state.delete_coach_id = None
-        st.rerun()
+    with col1:
+        if st.button("Yes, Delete", key="confirm_delete_coach"):
+            delete_coach(coach["id"])
+            st.success(f"{coach['name']} deleted.")
+            st.rerun()
+    with col2:
+        if st.button("Cancel", key="cancel_delete_coach"):
+            st.rerun()
 
 
-@st.dialog("Confirm Salary Payment")
-def mark_salary_paid_dialog(coach):
-    st.write(f"Mark **{coach['name']}**'s salary of ₹{coach['salary']} as paid for this month?")
-    col1, col2 = st.columns(2)
-    if col1.button("Yes, Mark Paid"):
-        clear_coach_salary(coach["id"], coach["name"], coach["salary"])
-        st.session_state.mark_paid_coach_id = None
-        st.rerun()
-    if col2.button("Cancel"):
-        st.session_state.mark_paid_coach_id = None
-        st.rerun()
+if coaches:
+    col_widths = [2.2, 1.6, 1.6, 1]
+    headers = ["Name", "Phone", "Salary", "Actions"]
 
+    with st.container(key="card_coaches_list"):
+        with st.container(key="table_coaches_list"):
+            with st.container(key="theader_coaches_list"):
+                header_cols = st.columns(col_widths)
+                for col, h in zip(header_cols, headers):
+                    col.markdown(f'<span class="table-header">{h}</span>', unsafe_allow_html=True)
 
-coaches = get_all_coaches()
-
-if not coaches:
-    st.info("No coaches added yet.")
+            for c in coaches:
+                row_cols = st.columns(col_widths)
+                row_cols[0].markdown(c["name"])
+                row_cols[1].markdown(c["phone"] or "—")
+                row_cols[2].markdown(f"₹{c['salary']}")
+                with row_cols[3]:
+                    action_cols = st.columns(2)
+                    if action_cols[0].button(":material/edit:", key=f"edit_{c['id']}", help="Edit"):
+                        edit_coach_dialog(c)
+                    if action_cols[1].button(":material/delete:", key=f"delete_{c['id']}", help="Delete"):
+                        delete_coach_dialog(c)
 else:
-    for coach in coaches:
-        cols = st.columns([0.25, 0.2, 0.15, 0.15, 0.125, 0.125])
-        cols[0].write(coach["name"])
-        cols[1].write(coach["phone"])
-        cols[2].write(f"₹{coach['salary']}")
-
-        paid = get_salary_status(coach["id"])
-        if paid:
-            cols[3].markdown("✅ Paid")
-        else:
-            if cols[3].button("🔴 Mark Paid", key=f"markpaid_{coach['id']}"):
-                st.session_state.mark_paid_coach_id = coach["id"]
-
-        if cols[4].button("Edit", key=f"edit_{coach['id']}"):
-            st.session_state.edit_coach_id = coach["id"]
-        if cols[5].button("Delete", key=f"delete_{coach['id']}"):
-            st.session_state.delete_coach_id = coach["id"]
-
-    if st.session_state.get("edit_coach_id"):
-        coach = next((c for c in coaches if c["id"] == st.session_state.edit_coach_id), None)
-        if coach:
-            edit_coach_dialog(coach)
-
-    if st.session_state.get("delete_coach_id"):
-        coach = next((c for c in coaches if c["id"] == st.session_state.delete_coach_id), None)
-        if coach:
-            delete_coach_dialog(coach)
-
-    if st.session_state.get("mark_paid_coach_id"):
-        coach = next((c for c in coaches if c["id"] == st.session_state.mark_paid_coach_id), None)
-        if coach:
-            mark_salary_paid_dialog(coach)
+    st.info("No coaches added yet." if not search_name else "No coaches match the current search.")

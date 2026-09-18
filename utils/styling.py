@@ -685,7 +685,9 @@ def apply_table_card_styles():
        Rescoped to table_students_roster only so it can no longer
        reach any other page's buttons.
     ----------------------------------------------------------- */
-    div[class*="st-key-table_students_roster"] button[data-testid^="stBaseButton"] {
+    div[class*="st-key-table_students_roster"] button[data-testid^="stBaseButton"],
+    div[class*="st-key-table_gym_roster"] button[data-testid^="stBaseButton"],
+    div[class*="st-key-table_coaches_list"] button[data-testid^="stBaseButton"] {
         min-height: unset !important;
         height: 2.1rem !important;
         width: 2.1rem !important;
@@ -697,7 +699,9 @@ def apply_table_card_styles():
         align-items: center !important;
         justify-content: center !important;
     }
-    div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] [data-testid="stHorizontalBlock"] {
+    div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] [data-testid="stHorizontalBlock"],
+    div[class*="st-key-table_gym_roster"] [data-testid="stHorizontalBlock"] [data-testid="stHorizontalBlock"],
+    div[class*="st-key-table_coaches_list"] [data-testid="stHorizontalBlock"] [data-testid="stHorizontalBlock"] {
         display: flex !important;
         gap: 0.5rem !important;
         flex-wrap: nowrap !important;
@@ -708,7 +712,11 @@ def apply_table_card_styles():
         border-bottom: none !important;
     }
     div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] [data-testid="stHorizontalBlock"] > div[data-testid="column"],
-    div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] {
+    div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"],
+    div[class*="st-key-table_gym_roster"] [data-testid="stHorizontalBlock"] [data-testid="stHorizontalBlock"] > div[data-testid="column"],
+    div[class*="st-key-table_gym_roster"] [data-testid="stHorizontalBlock"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"],
+    div[class*="st-key-table_coaches_list"] [data-testid="stHorizontalBlock"] [data-testid="stHorizontalBlock"] > div[data-testid="column"],
+    div[class*="st-key-table_coaches_list"] [data-testid="stHorizontalBlock"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] {
         flex: 0 0 auto !important;
         width: auto !important;
         min-width: 0 !important;
