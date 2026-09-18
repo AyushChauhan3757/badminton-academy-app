@@ -877,6 +877,24 @@ def apply_table_card_styles():
        including the pagination row — wider than the viewport. Fixed
        by forcing min-width:0 + box-sizing on this container and its
        ancestor card, in addition to the existing overflow-x:auto.
+
+       FIX (this pass, border-completeness bug): the outer row was
+       computing to an exact 900px box (matching min-width) even
+       though the real content — all 8 columns summed via
+       getBoundingClientRect() — measured 945px. `width: max-content`
+       was NOT resolving to that true content width in this flex/
+       scroll context (confirmed via console: computed width landed
+       on exactly 900px, the min-width floor, not 945px). Since
+       border-bottom paints along the row's own box, it stopped 45px
+       short of where the Actions column's border-right actually
+       rendered — that 45px gap is what looked like a missing/
+       incomplete border once scrolled to the right edge. Fixed by
+       replacing the unreliable `width: max-content` with a hardcoded
+       `950px` (content width + a small buffer) on both width and
+       min-width, so the row box is always guaranteed wide enough for
+       its own border to reach past the last column. If a future
+       column is added/removed from this table, this value may need
+       revisiting (sum of column widths below + ~5-10px buffer).
     --------------------------------------------------------------- */
     @media (max-width: 640px) {
         div[class*="st-key-card_students_roster"] {
@@ -897,8 +915,8 @@ def apply_table_card_styles():
         }
         div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] {
             flex-wrap: nowrap !important;
-            min-width: 900px !important;
-            width: max-content !important;
+            min-width: 945px !important;
+            width: 945px !important;
         }
         div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(1),
         div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:nth-child(1) { flex: 0 0 160px !important; width: 160px !important; }
@@ -967,6 +985,25 @@ def apply_table_card_styles():
         div[class*="st-key-theader_students_roster"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:last-child,
         div[class*="st-key-theader_students_roster"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:last-child {
             border-right: 2px solid #8FA0B8 !important;
+        }
+        /* FIX (this pass): the two :last-child re-enable rules above
+           are descendant selectors — they don't care HOW DEEP the
+           stHorizontalBlock is, only that the column is the last
+           child of *some* stHorizontalBlock inside the table. That
+           means they also matched the last child of the NESTED
+           Edit/Delete stHorizontalBlock (i.e. the Delete button's
+           own column), incorrectly re-adding a border-right onto
+           Delete itself — the stray vertical line reported right
+           after the Delete button. This rule is written with one
+           extra [data-testid="stHorizontalBlock"] token, giving it
+           higher specificity than the two rules above regardless of
+           source order, so it reliably wins and cancels the border
+           on the nested column specifically, leaving the OUTER
+           Actions column's re-enabled border-right (the one that's
+           actually needed to close off the row) untouched. */
+        div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:last-child,
+        div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:last-child {
+            border-right: none !important;
         }
     }
 
