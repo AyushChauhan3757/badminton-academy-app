@@ -476,6 +476,29 @@ def apply_table_card_styles():
        outstanding payment) and "Take Action" (neutral — may resolve
        to a payment OR a delete on the Missed Last Month tab). Both
        are centered within their table cell.
+
+       FIX (this pass): these buttons had regressed to tiny centered
+       squares with faint, unreadable 0.62rem text on DESKTOP. Root
+       cause was two-fold:
+         1) The button-text font-size rule below was accidentally
+            written outside any @media query, so the mobile-only
+            0.62rem size was applying on desktop too.
+         2. div[class*="st-key-table_"] button[data-testid^="stBaseButton"]
+            (further down this file) used the generic "table_" selector
+            instead of scoping to table_students_roster specifically —
+            because it carries an extra attribute selector, it has
+            HIGHER CSS specificity than these btn_markpaid_/btn_takeaction_
+            rules and was winning regardless of source order, forcing
+            EVERY button inside ANY table_ container (including these)
+            down to a fixed 2.1rem x 2.1rem square meant only for the
+            Students Roster's Edit/Delete icon buttons.
+       Fixed by: (a) giving these buttons explicit width/weight/color
+       here with normal specificity, and (b) rescoping the offending
+       rule down below to table_students_roster only, so it no longer
+       reaches these buttons at all. Desktop sizing now stays legible;
+       the mobile-specific shrink (still wanted on phones) lives ONLY
+       inside the existing @media (max-width: 640px) block further
+       down and is no longer duplicated up here.
     --------------------------------------------------------------- */
     div[class*="st-key-btn_markpaid_"] {
         display: flex !important;
@@ -484,15 +507,19 @@ def apply_table_card_styles():
     }
     div[class*="st-key-btn_markpaid_"] button {
         background-color: transparent !important;
-        border: 1px solid #E0524A !important;
+        border: 1.5px solid #E0524A !important;
         border-radius: 8px !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        height: auto !important;
+        padding: 0.4rem 0.6rem !important;
     }
-    div[class*="st-key-btn_markpaid_"] button p,
-    div[class*="st-key-btn_takeaction_"] button p {
-        white-space: normal !important;
-        font-size: 0.62rem !important;
-        word-break: normal !important;
-        overflow-wrap: normal !important;
+    div[class*="st-key-btn_markpaid_"] button p {
+        color: #E0524A !important;
+        font-weight: 700 !important;
+        font-size: 0.95rem !important;
+        white-space: nowrap !important;
+        margin: 0 !important;
     }
     div[class*="st-key-btn_markpaid_"] button:hover {
         background-color: #FBE7E6 !important;
@@ -502,6 +529,18 @@ def apply_table_card_styles():
         display: flex !important;
         justify-content: center !important;
         width: 100% !important;
+    }
+    div[class*="st-key-btn_takeaction_"] button {
+        width: 100% !important;
+        min-width: 0 !important;
+        height: auto !important;
+        padding: 0.4rem 0.6rem !important;
+    }
+    div[class*="st-key-btn_takeaction_"] button p {
+        font-weight: 600 !important;
+        font-size: 0.95rem !important;
+        white-space: nowrap !important;
+        margin: 0 !important;
     }
 
     /* ---------------------------------------------------------------
@@ -616,7 +655,9 @@ def apply_table_card_styles():
        BUTTONS INSIDE TABLE ROWS — Streamlit's own button wrapper
        (.stButton) and the <button> itself carry default padding/
        min-height that made button rows visibly taller than plain-
-       text rows; this collapses them down to match.
+       text rows; this collapses them down to match. Kept generic
+       (applies to any table_ container) since it's just padding/
+       height normalization, not a fixed-size override.
     --------------------------------------------------------------- */
     div[class*="st-key-table_"] .stButton {
         min-height: unset !important;
@@ -632,7 +673,19 @@ def apply_table_card_styles():
         min-height: unset !important;
         height: auto !important;
     }
-    div[class*="st-key-table_"] button[data-testid^="stBaseButton"] {
+
+    /* -----------------------------------------------------------
+       FIX (this pass): this fixed-square button-size rule is for
+       the Students Roster's Edit/Delete ICON buttons only. It was
+       previously written against the generic "table_" selector,
+       which — because it carries an extra attribute selector — has
+       higher specificity than the btn_markpaid_/btn_takeaction_
+       rules above and was silently shrinking Mark Paid / Take
+       Action buttons on the Pending page into 2.1rem squares too.
+       Rescoped to table_students_roster only so it can no longer
+       reach any other page's buttons.
+    ----------------------------------------------------------- */
+    div[class*="st-key-table_students_roster"] button[data-testid^="stBaseButton"] {
         min-height: unset !important;
         height: 2.1rem !important;
         width: 2.1rem !important;
@@ -651,6 +704,7 @@ def apply_table_card_styles():
         justify-content: center !important;
         align-items: center !important;
         width: auto !important;
+        min-width: 0 !important;
         border-bottom: none !important;
     }
     div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] [data-testid="stHorizontalBlock"] > div[data-testid="column"],
@@ -690,6 +744,9 @@ def apply_table_card_styles():
        MOBILE — force table rows back to row-direction (Streamlit
        defaults to column-stacking horizontal blocks under 640px) and
        shrink text/padding so all columns fit side by side on a phone.
+       This generic block is fine to keep un-scoped: it only affects
+       tables that DON'T also have the students_roster-specific fixed
+       pixel-width block further below (which overrides it there).
     --------------------------------------------------------------- */
     @media (max-width: 640px) {
         div[class*="st-key-table_"] [data-testid="stHorizontalBlock"] {
@@ -716,17 +773,23 @@ def apply_table_card_styles():
             word-break: normal !important;
             overflow-wrap: break-word !important;
         }
+        /* Mark Paid / Take Action: mobile-only shrink lives HERE and
+           only here now — no longer duplicated outside this media
+           query, which was what broke desktop sizing (see fix note
+           above). */
         div[class*="st-key-btn_markpaid_"] button,
         div[class*="st-key-btn_takeaction_"] button {
-            font-size: 0.62rem !important;
-            padding: 0.3rem 0.4rem !important;
+            font-size: 0.7rem !important;
+            padding: 0.35rem 0.4rem !important;
             white-space: normal !important;
-            line-height: 1.15 !important;
+            line-height: 1.2 !important;
+            width: 100% !important;
         }
         div[class*="st-key-btn_markpaid_"] button p,
         div[class*="st-key-btn_takeaction_"] button p {
             white-space: normal !important;
-            font-size: 0.62rem !important;
+            font-size: 0.7rem !important;
+            font-weight: 700 !important;
         }
         div[class*="st-key-table_"] [data-testid="stHorizontalBlock"] {
             min-height: 3.4rem !important;
@@ -739,17 +802,22 @@ def apply_table_card_styles():
     --------------------------------------------------------------- */
     div[class*="st-key-pagination_"] {
         margin-top: 0.75rem !important;
+        max-width: 100% !important;
+        overflow-x: hidden !important;
     }
     div[class*="st-key-pagination_"] [data-testid="stHorizontalBlock"] {
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
         gap: 0.75rem !important;
+        flex-wrap: nowrap !important;
+        max-width: 100% !important;
     }
     div[class*="st-key-pagination_"] [data-testid="stHorizontalBlock"] > div[data-testid="column"],
     div[class*="st-key-pagination_"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] {
         flex: 0 0 auto !important;
         width: auto !important;
+        min-width: 0 !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -788,21 +856,49 @@ def apply_table_card_styles():
        MOBILE — Students Roster table specifically: too many columns
        to shrink-to-fit without mangling text, so give it a fixed
        comfortable width and let the card scroll horizontally instead.
+
+       FIX (this pass, overlap bug): the nth-child(1)-(8) width rules
+       below apply to ANY [data-testid="stHorizontalBlock"] inside
+       table_students_roster — but the nested Edit/Delete
+       st.columns(2) is ALSO a stHorizontalBlock with its own columns
+       1 and 2. That meant Edit was inheriting the Name column's
+       160px width and Delete was inheriting the Batch column's
+       150px width, which is exactly the "Edit covers Date, table
+       breaks near Delete" overlap reported. Fixed by re-asserting
+       auto/fit-content sizing on any NESTED stHorizontalBlock's
+       columns, placed AFTER the nth-child rules so it wins (same
+       specificity, later in source order).
+
+       FIX (this pass, pagination-pushed-offscreen bug): a flex item
+       with overflow-x:auto still won't scroll and instead expands
+       past its container if it doesn't also get min-width:0 (the
+       default flex min-width is content-based, not 0). That let this
+       900px-wide table push the whole card — and everything below it,
+       including the pagination row — wider than the viewport. Fixed
+       by forcing min-width:0 + box-sizing on this container and its
+       ancestor card, in addition to the existing overflow-x:auto.
     --------------------------------------------------------------- */
     @media (max-width: 640px) {
+        div[class*="st-key-card_students_roster"] {
+            min-width: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+            overflow-x: hidden !important;
+        }
         div[class*="st-key-table_students_roster"] {
             overflow-x: auto !important;
             overflow-y: visible !important;
             -webkit-overflow-scrolling: touch !important;
+            min-width: 0 !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
         }
         div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] {
             flex-wrap: nowrap !important;
             min-width: 900px !important;
-        }
-        div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] [data-testid="stHorizontalBlock"] {
-            min-width: 0 !important;
-            width: auto !important;
-            flex: 0 0 auto !important;
+            width: max-content !important;
         }
         div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(1),
         div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:nth-child(1) { flex: 0 0 160px !important; width: 160px !important; }
@@ -820,6 +916,28 @@ def apply_table_card_styles():
         div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:nth-child(7) { flex: 0 0 80px !important; width: 80px !important; }
         div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(8),
         div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:nth-child(8) { flex: 0 0 90px !important; width: 90px !important; }
+
+        /* Re-assert AFTER the nth-child rules above: the nested
+           Edit/Delete columns must NOT inherit those fixed widths —
+           this is the fix for the overlap bug described above. */
+        div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] [data-testid="stHorizontalBlock"] > div[data-testid="column"],
+        div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] {
+            flex: 0 0 auto !important;
+            width: auto !important;
+            min-width: 0 !important;
+        }
+        /* The nested block ITSELF (not just its column children) was
+           also inheriting min-width:900px from the outer row rule
+           above via plain descendant matching — width:auto alone
+           doesn't cancel a min-width constraint, which is what was
+           still leaving a large empty gap before the Edit/Delete
+           buttons. Explicitly zero it here. */
+        div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] [data-testid="stHorizontalBlock"] {
+            min-width: 0 !important;
+            width: auto !important;
+            flex: 0 0 auto !important;
+        }
+
         div[class*="st-key-table_students_roster"] p,
         div[class*="st-key-table_students_roster"] .table-header {
             font-size: 0.8rem !important;
@@ -829,17 +947,50 @@ def apply_table_card_styles():
             white-space: nowrap !important;
             font-size: 0.75rem !important;
         }
+
+        /* On mobile the table scrolls horizontally, but the table's
+           outer rounded border (border + border-radius, set on the
+           static, non-scrolling table_ box) doesn't travel with the
+           scrolled content — by the time you scroll right to see
+           Actions, you've scrolled past where that border was drawn,
+           so the row/header appear to have no closing border at all
+           ("cell borders ending"). The generic :last-child rule
+           (which removes border-right on the last column, correct
+           for the STATIC/unscrolled case) is what's removing the one
+           border that would otherwise close off the row visually
+           while scrolled. Re-enable it here, scoped to Students
+           Roster's mobile view only, for both data rows and header. */
+        div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:last-child,
+        div[class*="st-key-table_students_roster"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:last-child {
+            border-right: 1px solid #8FA0B8 !important;
+        }
+        div[class*="st-key-theader_students_roster"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:last-child,
+        div[class*="st-key-theader_students_roster"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:last-child {
+            border-right: 2px solid #8FA0B8 !important;
+        }
     }
 
     /* ---------------------------------------------------------------
        MOBILE — pagination row: Streamlit's default column-stacking
        for horizontal blocks under 640px breaks the centered row and
        stretches buttons full-width; force it back to a compact row.
+       Also hardened with min-width:0/max-width so it can never be
+       pushed off-screen by a sibling table expanding above it.
     --------------------------------------------------------------- */
     @media (max-width: 640px) {
+        div[class*="st-key-pagination_"] {
+            max-width: 100vw !important;
+            overflow-x: hidden !important;
+        }
         div[class*="st-key-pagination_"] [data-testid="stHorizontalBlock"] {
             flex-direction: row !important;
             flex-wrap: nowrap !important;
+            min-width: 0 !important;
+            max-width: 100% !important;
+        }
+        div[class*="st-key-pagination_"] [data-testid="stHorizontalBlock"] > div[data-testid="column"],
+        div[class*="st-key-pagination_"] [data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] {
+            min-width: 0 !important;
         }
         div[class*="st-key-pagination_"] button {
             padding: 0.45rem 0.9rem !important;
