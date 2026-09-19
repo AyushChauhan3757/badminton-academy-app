@@ -82,7 +82,7 @@ else:
 
     admin_pages = [
         st.Page("pages_admin/1_Overview.py", title="Overview", icon=":material/space_dashboard:"),
-        st.Page("pages_admin/2_Pending.py", title="Fees Pending", icon=":material/pending_actions:"),
+        st.Page("pages_admin/2_Pending.py", title="Pending", icon=":material/pending_actions:"),
         st.Page("pages_admin/3_Students.py", title="Students Roster", icon=":material/school:"),
         st.Page("pages_admin/4_Coaches.py", title="Coaches List", icon=":material/groups:"),
         st.Page("pages_admin/5_Gym.py", title="Gym Roster", icon=":material/fitness_center:"),
