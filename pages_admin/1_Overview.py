@@ -180,7 +180,7 @@ with st.container(border=True, key="card_recent_activity"):
             for row in log_rows:
                 category = row['category']
                 description = row['description'] or "Deleted student/member"
-                is_expense = category.lower() == 'expense'
+                is_expense = category.lower() in ('expense', 'salary')
                 amount_color = "#E0524A" if is_expense else "#22A06B"
                 sign = "-" if is_expense else "+"
                 display_date = date.fromisoformat(row['date']).strftime('%d/%m/%Y')
