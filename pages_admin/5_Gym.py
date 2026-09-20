@@ -11,6 +11,7 @@ from db.gym_members import (
 )
 from utils.auth import require_role
 from utils.header import render_header
+from utils.ui_helpers import render_dialog_icon, render_dialog_message
 
 require_role([ROLE_ADMIN])
 
@@ -105,16 +106,19 @@ def edit_gym_member_dialog(member):
 
 @st.dialog("Delete Gym Member")
 def delete_gym_member_dialog(member):
-    st.warning(f"Are you sure you want to delete **{member['name']}**? This cannot be undone.")
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("Yes, Delete", key="confirm_delete_gym"):
-            delete_gym_member(member["id"])
-            st.success(f"{member['name']} deleted.")
-            st.rerun()
-    with col2:
-        if st.button("Cancel", key="cancel_delete_gym"):
-            st.rerun()
+    render_dialog_icon("delete", "danger")
+    render_dialog_message(
+        "Delete Record?",
+        "This action cannot be undone.<br>"
+        f"Are you sure you want to delete <b>{member['name']}</b>'s record?"
+    )
+    col_cancel, col_delete = st.columns(2)
+    if col_cancel.button("Cancel", key=f"dlg_secondary_delgym_{member['id']}", use_container_width=True):
+        st.rerun()
+    if col_delete.button("Delete", key=f"dlg_danger_delgym_{member['id']}", use_container_width=True):
+        delete_gym_member(member["id"])
+        st.success(f"{member['name']} deleted.")
+        st.rerun()
 
 
 if paginated_members:

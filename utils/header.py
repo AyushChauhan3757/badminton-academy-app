@@ -1,5 +1,29 @@
 import streamlit as st
 from utils.auth import logout, now_ist
+from utils.ui_helpers import render_dialog_icon, render_dialog_message
+
+
+# -------------------------------------------------------------------------
+# Logout Confirmation popup — replaces the previous instant-logout
+# behavior with a confirm step. Uses the same icon-circle + centered
+# message + button-variant dialog pattern as the rest of the app (see
+# utils/ui_helpers.py's render_dialog_icon()/render_dialog_message(),
+# CSS in utils/styling.py's apply_dialog_styles()). Keyed by title so
+# a call from any page's header gets unique widget keys.
+# -------------------------------------------------------------------------
+def _confirm_logout_dialog(title):
+    @st.dialog("Logout Confirmation")
+    def confirm_logout():
+        render_dialog_icon("logout", "info")
+        render_dialog_message("Logout?", "Are you sure you want to logout?")
+        col_cancel, col_logout = st.columns(2)
+        if col_cancel.button("Cancel", key=f"dlg_secondary_logout_cancel_{title}", use_container_width=True):
+            st.rerun()
+        if col_logout.button("Logout", key=f"dlg_primary_logout_confirm_{title}", use_container_width=True):
+            logout()
+            st.rerun()
+
+    confirm_logout()
 
 
 def render_header(title):
@@ -33,5 +57,4 @@ def render_header(title):
     with col_logout:
         st.markdown("<div style='padding-top:1.6rem;'></div>", unsafe_allow_html=True)
         if st.button("Logout", key=f"header_logout_btn_{title}"):
-            logout()
-            st.rerun()
+            _confirm_logout_dialog(title)

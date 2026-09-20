@@ -4,6 +4,7 @@ from constants import ROLE_ADMIN
 from db.coaches import add_coach, delete_coach, get_all_coaches, update_coach
 from utils.auth import require_role
 from utils.header import render_header
+from utils.ui_helpers import render_dialog_icon, render_dialog_message
 
 require_role([ROLE_ADMIN])
 
@@ -58,16 +59,19 @@ def edit_coach_dialog(coach):
 
 @st.dialog("Delete Coach")
 def delete_coach_dialog(coach):
-    st.warning(f"Are you sure you want to delete **{coach['name']}**? This cannot be undone.")
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("Yes, Delete", key="confirm_delete_coach"):
-            delete_coach(coach["id"])
-            st.success(f"{coach['name']} deleted.")
-            st.rerun()
-    with col2:
-        if st.button("Cancel", key="cancel_delete_coach"):
-            st.rerun()
+    render_dialog_icon("delete", "danger")
+    render_dialog_message(
+        "Delete Record?",
+        "This action cannot be undone.<br>"
+        f"Are you sure you want to delete <b>{coach['name']}</b>'s record?"
+    )
+    col_cancel, col_delete = st.columns(2)
+    if col_cancel.button("Cancel", key=f"dlg_secondary_delcoach_{coach['id']}", use_container_width=True):
+        st.rerun()
+    if col_delete.button("Delete", key=f"dlg_danger_delcoach_{coach['id']}", use_container_width=True):
+        delete_coach(coach["id"])
+        st.success(f"{coach['name']} deleted.")
+        st.rerun()
 
 
 if coaches:

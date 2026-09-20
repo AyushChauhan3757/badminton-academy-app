@@ -133,26 +133,38 @@ with st.container(key="kpi_section_mobile"):
         render_mobile_kpi("kpi_m_profit_month", "Profit", totals["month_profit"])
 
 
-if st.session_state.get("show_add_transaction"):
-    @st.dialog("Add Transaction")
-    def add_transaction_dialog():
-        title = st.text_input("Title")
-        amount = st.number_input("Amount (₹)", min_value=0, step=100)
+# -----------------------------------------------------------------
+# Add Transaction — a plain data-entry form, so no icon-circle here
+# (icons are reserved for confirm/warning-style dialogs elsewhere,
+# per the reference mockups). Cancel renders left (secondary/gray),
+# the submit action renders right (primary/navy), matching the
+# Cancel-left / colored-action-right layout used across every other
+# restyled dialog in the app.
+#
+# FIX: previously gated behind a st.session_state["show_add_transaction"]
+# flag that was only checked BEFORE the button that set it, further up
+# the script — meaning the dialog only opened on the rerun AFTER the
+# click that set the flag, which could read as needing more than one
+# click. Every other Add/Edit/Delete dialog in the app instead calls
+# the @st.dialog-decorated function directly inside the button's
+# if-block, which opens in a single click — switched to match that
+# same proven pattern.
+# -----------------------------------------------------------------
+@st.dialog("Add Transaction")
+def add_transaction_dialog():
+    title = st.text_input("Title")
+    amount = st.number_input("Amount (₹)", min_value=0, step=100)
 
-        col1, col2 = st.columns(2)
-        if col1.button("Add", use_container_width=True):
-            if title.strip() and amount > 0:
-                from db.overview import add_transaction
-                add_transaction(title.strip(), amount)
-                st.session_state.show_add_transaction = False
-                st.rerun()
-            else:
-                st.error("Please enter a title and an amount greater than 0.")
-        if col2.button("Cancel", use_container_width=True):
-            st.session_state.show_add_transaction = False
+    col_cancel, col_add = st.columns(2)
+    if col_cancel.button("Cancel", key="dlg_secondary_add_txn_cancel", use_container_width=True):
+        st.rerun()
+    if col_add.button("Add", key="dlg_primary_add_txn_submit", use_container_width=True):
+        if title.strip() and amount > 0:
+            from db.overview import add_transaction
+            add_transaction(title.strip(), amount)
             st.rerun()
-
-    add_transaction_dialog()
+        else:
+            st.error("Please enter a title and an amount greater than 0.")
 
 with st.container(border=True, key="card_recent_activity"):
     st.subheader("Recent Activity")
@@ -160,7 +172,7 @@ with st.container(border=True, key="card_recent_activity"):
     col_a, col_b = st.columns([3, 1])
     with col_a:
         if st.button("+ Add Transaction", key="btn_add_transaction"):
-            st.session_state.show_add_transaction = True
+            add_transaction_dialog()
     with col_b:
         st.page_link("pages_admin/6_Log.py", label="View Full Log →", use_container_width=True)
 

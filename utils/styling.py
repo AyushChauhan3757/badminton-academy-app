@@ -228,6 +228,7 @@ def apply_theme():
     apply_table_card_styles()
     apply_tab_styles()
     apply_filter_control_styles()
+    apply_dialog_styles()
 
 
 # =============================================================================
@@ -1142,6 +1143,208 @@ def apply_tab_styles():
             line-height: 1.15 !important;
             text-align: center !important;
         }
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+
+# =============================================================================
+# apply_dialog_styles()
+# Styles Streamlit's native st.dialog() popup — the shared "skin" every
+# popup in the app inherits automatically (Add/Edit/Delete on Students/
+# Gym/Coaches, Mark Fee Paid, Clear Salary, Missed-Last-Month Take Action,
+# Add Transaction — plus future ones: Logout confirm, Session-Expired).
+#
+# Real selector confirmed via DevTools (build log Entry 45):
+# div[data-testid="stDialog"] (class .stDialog) is the dialog's outer
+# card. It renders in a top-level DOM portal, a SIBLING of the app root —
+# NOT nested inside [data-testid="stAppViewContainer"] — so none of the
+# app-wide rules scoped to stAppViewContainer (e.g. the global h1
+# font-size rule in apply_theme()) reach inside a dialog. Any dialog-
+# specific typography/spacing must be declared here instead.
+#
+# This pass adds the shared confirm-dialog "content kit" seen across the
+# reference popup mockups (Mark Fee Paid, Clear Salary, Mark Late/Delete,
+# Delete Record, Logout, Session Timeout): a centered icon circle above
+# the message, a bold centered title + gray centered subtext, and
+# key-prefix button variants (dlg_primary_/dlg_secondary_/dlg_danger_/
+# dlg_gold_) that plug into the same st-key-as-CSS-class convention
+# already used app-wide (btn_markpaid_, btn_add_student, etc.). These
+# are opt-in classes/keys — existing dialogs are unaffected until a page
+# is updated to use render_dialog_icon()/render_dialog_message() and the
+# new button key prefixes (see utils/ui_helpers.py).
+# =============================================================================
+
+def apply_dialog_styles():
+    st.markdown("""
+    <style>
+    /* ---------------------------------------------------------------
+       DIALOG CARD — outer shape (rounded corners, shadow, border)
+    --------------------------------------------------------------- */
+    div[data-testid="stDialog"] {
+        border-radius: 20px !important;
+        box-shadow: 0 20px 50px rgba(20, 48, 79, 0.25) !important;
+        border: 1px solid #E1E8F0 !important;
+    }
+
+    /* ---------------------------------------------------------------
+       DIALOG HEADING — dialogs render in their own DOM portal, so the
+       app-wide h1 rule (scoped to stAppViewContainer, in apply_theme())
+       never reaches here; this is the dialog-only equivalent.
+    --------------------------------------------------------------- */
+    div[data-testid="stDialog"] h1 {
+        font-size: 1.8rem !important;
+        color: #14304F !important;
+        font-weight: 700 !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    /* ---------------------------------------------------------------
+       DIALOG ICON CIRCLE — centered icon above the message, colored
+       by the action's nature (success/warning/danger/info). Rendered
+       via render_dialog_icon() in utils/ui_helpers.py.
+    --------------------------------------------------------------- */
+    .dialog-icon-wrap {
+        display: flex;
+        justify-content: center;
+        margin: 0.25rem 0 1rem 0;
+    }
+    .dialog-icon-circle {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .dialog-icon-circle .material-symbols-outlined {
+        font-size: 32px;
+    }
+    .dialog-icon-success { background-color: #E3F5EA; }
+    .dialog-icon-success .material-symbols-outlined { color: #22A06B; }
+    .dialog-icon-warning { background-color: #FDF0DC; }
+    .dialog-icon-warning .material-symbols-outlined { color: #E0AC4B; }
+    .dialog-icon-danger { background-color: #FBE7E6; }
+    .dialog-icon-danger .material-symbols-outlined { color: #E0524A; }
+    .dialog-icon-info { background-color: #EAF1FB; }
+    .dialog-icon-info .material-symbols-outlined { color: #1D4C82; }
+
+    /* ---------------------------------------------------------------
+       DIALOG MESSAGE TEXT — centered bold question + gray supporting
+       line, replacing plain st.write() calls in confirm dialogs.
+       Rendered via render_dialog_message() in utils/ui_helpers.py.
+    --------------------------------------------------------------- */
+    .dialog-title {
+        text-align: center;
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: #14304F;
+        margin-bottom: 0.5rem;
+    }
+    .dialog-subtext {
+        text-align: center;
+        color: #6B7280;
+        font-size: 0.98rem;
+        margin-bottom: 1.3rem;
+        line-height: 1.5;
+    }
+    .dialog-subtext b {
+        color: #14304F;
+    }
+
+    /* ---------------------------------------------------------------
+       DIALOG ACTION BUTTONS — variants selected by key-prefix
+       (dlg_primary_/dlg_secondary_/dlg_danger_/dlg_gold_), following
+       the app's existing button-key-as-CSS-class convention
+       (btn_markpaid_, btn_takeaction_, btn_add_student, etc.).
+    --------------------------------------------------------------- */
+    div[class*="st-key-dlg_primary_"] button {
+        background-color: #14304F !important;
+        border: none !important;
+        border-radius: 10px !important;
+        font-weight: 600 !important;
+    }
+    div[class*="st-key-dlg_primary_"] button p {
+        color: #FFFFFF !important;
+    }
+    div[class*="st-key-dlg_primary_"] button:hover {
+        background-color: #1D4C82 !important;
+    }
+
+    div[class*="st-key-dlg_secondary_"] button {
+        background-color: #F1F4F8 !important;
+        border: 1px solid #D7E1EE !important;
+        border-radius: 10px !important;
+        font-weight: 600 !important;
+    }
+    div[class*="st-key-dlg_secondary_"] button p {
+        color: #374151 !important;
+    }
+    div[class*="st-key-dlg_secondary_"] button:hover {
+        background-color: #E5EAF1 !important;
+    }
+
+    div[class*="st-key-dlg_danger_"] button {
+        background-color: #E0524A !important;
+        border: none !important;
+        border-radius: 10px !important;
+        font-weight: 600 !important;
+    }
+    div[class*="st-key-dlg_danger_"] button p {
+        color: #FFFFFF !important;
+    }
+    div[class*="st-key-dlg_danger_"] button:hover {
+        background-color: #C23B33 !important;
+    }
+
+    div[class*="st-key-dlg_gold_"] button {
+        background-color: #E0AC4B !important;
+        border: none !important;
+        border-radius: 10px !important;
+        font-weight: 600 !important;
+    }
+    div[class*="st-key-dlg_gold_"] button p {
+        color: #14304F !important;
+    }
+    div[class*="st-key-dlg_gold_"] button:hover {
+        background-color: #C9922E !important;
+    }
+
+    /* ---------------------------------------------------------------
+       DIALOG OPTION CARDS — a two-button selectable-card toggle used
+       in place of st.radio for choice-style dialogs (e.g. Take Action
+       on the Missed Last Month tab: Mark as Late Paid vs. Delete
+       Student Record). Selection state lives in st.session_state and
+       is reflected by swapping the button's key prefix between
+       dlg_option_selected_ and dlg_option_unselected_ on each rerun —
+       the same "key-prefix decides the CSS variant" convention
+       already used for the Take Action confirm button (dlg_primary_
+       vs. dlg_danger_) and row-action buttons elsewhere in the app.
+       Replaces an earlier attempt at styling st.radio() directly.
+    --------------------------------------------------------------- */
+    div[class*="st-key-dlg_option_selected_"] button {
+        background-color: #EAF1FB !important;
+        border: 2px solid #1D4C82 !important;
+        border-radius: 10px !important;
+        font-weight: 700 !important;
+        padding: 0.65rem 0.5rem !important;
+    }
+    div[class*="st-key-dlg_option_selected_"] button p {
+        color: #14304F !important;
+    }
+    div[class*="st-key-dlg_option_unselected_"] button {
+        background-color: #FFFFFF !important;
+        border: 1.5px solid #D7E1EE !important;
+        border-radius: 10px !important;
+        font-weight: 500 !important;
+        padding: 0.65rem 0.5rem !important;
+    }
+    div[class*="st-key-dlg_option_unselected_"] button p {
+        color: #6B7280 !important;
+    }
+    div[class*="st-key-dlg_option_unselected_"] button:hover {
+        background-color: #F5F8FB !important;
+        border-color: #B9C4D3 !important;
     }
     </style>
     """, unsafe_allow_html=True)

@@ -6,7 +6,7 @@ from constants import BATCH_FEES, BATCH_TIMINGS, ROLE_ADMIN
 from db.students import add_student, delete_student, get_all_students, update_student
 from utils.auth import require_role
 from utils.header import render_header
-from utils.ui_helpers import batch_pill, timing_pill
+from utils.ui_helpers import batch_pill, timing_pill, render_dialog_icon, render_dialog_message
 
 require_role([ROLE_ADMIN])
 
@@ -157,16 +157,19 @@ def update_student_dialog(student):
 
 @st.dialog("Delete Student")
 def delete_student_dialog(student):
-    st.warning(f"Are you sure you want to delete **{student['name']}**? This cannot be undone.")
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("Yes, Delete", key="confirm_delete_student"):
-            delete_student(student["id"])
-            st.success(f"{student['name']} deleted.")
-            st.rerun()
-    with col2:
-        if st.button("Cancel", key="cancel_delete_student"):
-            st.rerun()
+    render_dialog_icon("delete", "danger")
+    render_dialog_message(
+        "Delete Record?",
+        "This action cannot be undone.<br>"
+        f"Are you sure you want to delete <b>{student['name']}</b>'s record?"
+    )
+    col_cancel, col_delete = st.columns(2)
+    if col_cancel.button("Cancel", key=f"dlg_secondary_delstudent_{student['id']}", use_container_width=True):
+        st.rerun()
+    if col_delete.button("Delete", key=f"dlg_danger_delstudent_{student['id']}", use_container_width=True):
+        delete_student(student["id"])
+        st.success(f"{student['name']} deleted.")
+        st.rerun()
 
 
 if paginated_students:
