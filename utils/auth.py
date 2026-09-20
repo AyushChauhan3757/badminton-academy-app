@@ -1,11 +1,11 @@
 import streamlit as st
 from datetime import datetime, timedelta
+from constants import ROLE_ADMIN, ROLE_COACH, IDLE_TIMEOUT_MINUTES
 import pytz
 
 from utils.ui_helpers import render_dialog_icon, render_dialog_message
 
 # ⚠️ TEMPORARY DEV BYPASS — set to False before any real testing or deployment.
-from constants import ROLE_ADMIN, ROLE_COACH
 DEV_SKIP_LOGIN = True
 DEV_SKIP_LOGIN_ROLE = ROLE_ADMIN # change to ROLE_COACH if you want to test coach view instead
 
