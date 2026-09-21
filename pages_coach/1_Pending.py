@@ -5,7 +5,7 @@ from utils.auth import require_role, now_ist
 from constants import ROLE_COACH
 from utils.header import render_header
 from db.payments import get_pending_fees, mark_fee_paid, get_paid_fees, get_missed_last_month
-from utils.ui_helpers import batch_pill
+from utils.ui_helpers import batch_pill, queue_toast
 
 require_role([ROLE_COACH])
 
@@ -53,6 +53,7 @@ with tab_fees:
                 year=current_year,
                 marked_by="coach"
             )
+            queue_toast("Payment Recorded", f"{p['name']} · ₹{p['amount']}")
             st.rerun()
         if col_no.button("Cancel", key=f"fee_paid_no_{p['payer_type']}_{p['payer_id']}", use_container_width=True):
             st.rerun()
@@ -126,6 +127,7 @@ with tab_missed:
                 year=missed_year,
                 marked_by="coach"
             )
+            queue_toast("Late Payment Recorded", f"{p['name']} · ₹{p['amount']}")
             st.rerun()
         if col_no.button("Cancel", key=f"missed_no_{p['payer_type']}_{p['payer_id']}", use_container_width=True):
             st.rerun()

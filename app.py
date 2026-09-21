@@ -1,6 +1,7 @@
 import streamlit as st
 from utils.auth import init_session, check_idle_timeout, logout, now_ist
 from utils.styling import apply_theme, apply_login_styles
+from utils.ui_helpers import show_pending_toast
 
 st.set_page_config(page_title="Avni Badminton Academy", page_icon="🏸", layout="wide")
 apply_theme()
@@ -98,4 +99,5 @@ else:
     pages = admin_pages if st.session_state.role == "admin" else coach_pages
 
 nav = st.navigation(pages)
+show_pending_toast()
 nav.run()

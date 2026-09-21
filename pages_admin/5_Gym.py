@@ -11,7 +11,7 @@ from db.gym_members import (
 )
 from utils.auth import require_role
 from utils.header import render_header
-from utils.ui_helpers import render_dialog_icon, render_dialog_message
+from utils.ui_helpers import render_dialog_icon, render_dialog_message, queue_toast
 
 require_role([ROLE_ADMIN])
 
@@ -31,7 +31,7 @@ def add_gym_member_dialog():
             st.error("Name is required.")
         else:
             add_gym_member(name.strip(), phone.strip(), str(joining_date))
-            st.success(f"{name} added.")
+            queue_toast("Gym Member Added", name.strip())
             st.rerun()
 
 
@@ -100,7 +100,7 @@ def edit_gym_member_dialog(member):
             st.error("Name is required.")
         else:
             update_gym_member(member["id"], name.strip(), phone.strip(), str(joining_date))
-            st.success(f"{name} updated.")
+            queue_toast("Gym Member Updated", name.strip())
             st.rerun()
 
 
@@ -117,7 +117,7 @@ def delete_gym_member_dialog(member):
         st.rerun()
     if col_delete.button("Delete", key=f"dlg_danger_delgym_{member['id']}", use_container_width=True):
         delete_gym_member(member["id"])
-        st.success(f"{member['name']} deleted.")
+        queue_toast("Record Deleted", member["name"], kind="danger")
         st.rerun()
 
 

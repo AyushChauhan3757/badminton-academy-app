@@ -5,6 +5,7 @@ from db.overview import get_totals
 from db.overview import get_recent_log
 from utils.header import render_header
 from datetime import date
+from utils.ui_helpers import queue_toast
 
 require_role([ROLE_ADMIN])
 
@@ -162,6 +163,7 @@ def add_transaction_dialog():
         if title.strip() and amount > 0:
             from db.overview import add_transaction
             add_transaction(title.strip(), amount)
+            queue_toast("Transaction Added", f"{title.strip()} · ₹{amount:,}")
             st.rerun()
         else:
             st.error("Please enter a title and an amount greater than 0.")

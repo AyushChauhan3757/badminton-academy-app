@@ -4,7 +4,7 @@ from constants import ROLE_ADMIN
 from db.coaches import add_coach, delete_coach, get_all_coaches, update_coach
 from utils.auth import require_role
 from utils.header import render_header
-from utils.ui_helpers import render_dialog_icon, render_dialog_message
+from utils.ui_helpers import render_dialog_icon, render_dialog_message, queue_toast
 
 require_role([ROLE_ADMIN])
 
@@ -22,7 +22,7 @@ def add_coach_dialog():
             st.error("Name is required.")
         else:
             add_coach(name.strip(), phone.strip(), salary)
-            st.success(f"{name} added.")
+            queue_toast("Coach Added", name.strip())
             st.rerun()
 
 
@@ -53,7 +53,7 @@ def edit_coach_dialog(coach):
             st.error("Name is required.")
         else:
             update_coach(coach["id"], name.strip(), phone.strip(), salary)
-            st.success(f"{name} updated.")
+            queue_toast("Coach Updated", name.strip())
             st.rerun()
 
 
@@ -70,7 +70,7 @@ def delete_coach_dialog(coach):
         st.rerun()
     if col_delete.button("Delete", key=f"dlg_danger_delcoach_{coach['id']}", use_container_width=True):
         delete_coach(coach["id"])
-        st.success(f"{coach['name']} deleted.")
+        queue_toast("Record Deleted", coach["name"], kind="danger")
         st.rerun()
 
 

@@ -1346,6 +1346,24 @@ def apply_dialog_styles():
         background-color: #F5F8FB !important;
         border-color: #B9C4D3 !important;
     }
+    /* ---- Toast ---- */
+    div[data-testid="stToast"] {
+        background-color: #FFFFFF !important;
+        border: 1px solid #E3E8F0 !important;
+        border-left: 5px solid #22A06B !important;
+        border-radius: 12px !important;
+        box-shadow: 0 8px 24px rgba(20, 48, 79, 0.18) !important;
+    }
+    div[data-testid="stToast"] strong {
+        color: #14304F !important;
+        font-weight: 800 !important;
+    }
+    div[data-testid="stToast"] p + p {
+        color: #6B7A90 !important;
+    }
+    span[data-testid="stToastDynamicIcon"] {
+        color: #14304F !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 

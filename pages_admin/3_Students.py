@@ -6,7 +6,7 @@ from constants import BATCH_FEES, BATCH_TIMINGS, ROLE_ADMIN
 from db.students import add_student, delete_student, get_all_students, update_student
 from utils.auth import require_role
 from utils.header import render_header
-from utils.ui_helpers import batch_pill, timing_pill, render_dialog_icon, render_dialog_message
+from utils.ui_helpers import batch_pill, timing_pill, render_dialog_icon, render_dialog_message, queue_toast
 
 require_role([ROLE_ADMIN])
 
@@ -47,7 +47,7 @@ def add_student_dialog():
                 guardian_name=guardian_name.strip(),
                 phone=phone.strip(),
             )
-            st.success(f"{name} added.")
+            queue_toast("Student Added", name.strip())
             st.rerun()
 
 
@@ -151,7 +151,7 @@ def update_student_dialog(student):
                 guardian_name=guardian_name.strip(),
                 phone=phone.strip(),
             )
-            st.success(f"{name} updated.")
+            queue_toast("Student Updated", name.strip())
             st.rerun()
 
 
@@ -168,7 +168,7 @@ def delete_student_dialog(student):
         st.rerun()
     if col_delete.button("Delete", key=f"dlg_danger_delstudent_{student['id']}", use_container_width=True):
         delete_student(student["id"])
-        st.success(f"{student['name']} deleted.")
+        queue_toast("Record Deleted", student["name"], kind="danger")
         st.rerun()
 
 

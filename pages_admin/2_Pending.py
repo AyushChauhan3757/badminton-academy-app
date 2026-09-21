@@ -4,7 +4,7 @@ from utils.auth import require_role, now_ist
 from constants import ROLE_ADMIN
 from utils.header import render_header
 from db.payments import get_pending_fees, mark_fee_paid, get_paid_fees, get_missed_last_month
-from utils.ui_helpers import batch_pill, render_dialog_icon, render_dialog_message
+from utils.ui_helpers import batch_pill, render_dialog_icon, render_dialog_message, queue_toast
 
 require_role([ROLE_ADMIN])
 
@@ -61,6 +61,7 @@ with tab_salary:
                 month=current_month,
                 year=current_year
             )
+            queue_toast("Salary Paid", f"{coach['name']} · ₹{coach['salary']}")
             st.rerun()
 
     with st.container(border=True, key="card_salary_pending"):
@@ -136,6 +137,7 @@ with tab_fees:
                 year=current_year,
                 marked_by="admin"
             )
+            queue_toast("Payment Recorded", f"{p['name']} · ₹{p['amount']}")
             st.rerun()
 
     with st.container(border=True, key="card_fees_pending"):
@@ -278,11 +280,13 @@ with tab_missed:
                     year=missed_year,
                     marked_by="admin"
                 )
+                queue_toast("Late Payment Recorded", f"{p['name']} · ₹{p['amount']}")
             else:
                 if p['payer_type'] == 'student':
                     delete_student(p['payer_id'])
                 else:
                     delete_gym_member(p['payer_id'])
+                queue_toast("Record Deleted", p['name'], kind="danger")
             del st.session_state[choice_key]
             st.rerun()
 
