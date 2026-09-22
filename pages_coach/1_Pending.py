@@ -5,7 +5,7 @@ from utils.auth import require_role, now_ist
 from constants import ROLE_COACH
 from utils.header import render_header
 from db.payments import get_pending_fees, mark_fee_paid, get_paid_fees, get_missed_last_month
-from utils.ui_helpers import batch_pill, queue_toast
+from utils.ui_helpers import batch_pill, render_dialog_icon, render_dialog_message, queue_toast
 
 require_role([ROLE_COACH])
 
@@ -41,10 +41,16 @@ with tab_fees:
 
     @st.dialog("Confirm Payment")
     def confirm_fee_paid(p):
-        st.write(f"Mark **{p['name']}**'s fee as paid for {calendar.month_name[current_month]} {current_year}?")
-        st.write(f"Amount: ₹{p['amount']}")
-        col_yes, col_no = st.columns(2)
-        if col_yes.button("Yes", key=f"fee_paid_yes_{p['payer_type']}_{p['payer_id']}", use_container_width=True):
+        render_dialog_icon("check_circle", "success")
+        render_dialog_message(
+            "Mark Fee as Paid?",
+            f"Are you sure you want to mark the fee as paid for<br><b>{p['name']}</b>?<br>"
+            f"Amount: ₹{p['amount']} ({calendar.month_name[current_month]} {current_year})"
+        )
+        col_no, col_yes = st.columns(2)
+        if col_no.button("Cancel", key=f"dlg_secondary_feepaid_no_{p['payer_type']}_{p['payer_id']}", use_container_width=True):
+            st.rerun()
+        if col_yes.button("Yes, Mark Paid", key=f"dlg_primary_feepaid_yes_{p['payer_type']}_{p['payer_id']}", use_container_width=True):
             mark_fee_paid(
                 payer_type=p['payer_type'],
                 payer_id=p['payer_id'],
@@ -54,8 +60,6 @@ with tab_fees:
                 marked_by="coach"
             )
             queue_toast("Payment Recorded", f"{p['name']} · ₹{p['amount']}")
-            st.rerun()
-        if col_no.button("Cancel", key=f"fee_paid_no_{p['payer_type']}_{p['payer_id']}", use_container_width=True):
             st.rerun()
 
     with st.container(border=True, key="card_fees_pending"):
@@ -115,10 +119,16 @@ with tab_missed:
     # Admin-only (spec Permission Model), so there is no delete option here.
     @st.dialog("Mark as Late Paid")
     def confirm_missed_paid(p):
-        st.write(f"Mark **{p['name']}** ({p['payer_type'].capitalize()}) as paid for {calendar.month_name[missed_month]} {missed_year}?")
-        st.write(f"Amount: ₹{p['amount']}")
-        col_yes, col_no = st.columns(2)
-        if col_yes.button("Yes", key=f"missed_yes_{p['payer_type']}_{p['payer_id']}", use_container_width=True):
+        render_dialog_icon("check_circle", "success")
+        render_dialog_message(
+            "Mark Late Payment as Paid?",
+            f"Are you sure you want to mark<br><b>{p['name']}</b> ({p['payer_type'].capitalize()}) as paid for<br>"
+            f"{calendar.month_name[missed_month]} {missed_year}?<br>Amount: ₹{p['amount']}"
+        )
+        col_no, col_yes = st.columns(2)
+        if col_no.button("Cancel", key=f"dlg_secondary_missed_no_{p['payer_type']}_{p['payer_id']}", use_container_width=True):
+            st.rerun()
+        if col_yes.button("Yes, Mark Paid", key=f"dlg_primary_missed_yes_{p['payer_type']}_{p['payer_id']}", use_container_width=True):
             mark_fee_paid(
                 payer_type=p['payer_type'],
                 payer_id=p['payer_id'],
@@ -128,8 +138,6 @@ with tab_missed:
                 marked_by="coach"
             )
             queue_toast("Late Payment Recorded", f"{p['name']} · ₹{p['amount']}")
-            st.rerun()
-        if col_no.button("Cancel", key=f"missed_no_{p['payer_type']}_{p['payer_id']}", use_container_width=True):
             st.rerun()
 
     with st.container(border=True, key="card_missed_last_month"):
