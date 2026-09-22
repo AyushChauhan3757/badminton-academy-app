@@ -41,11 +41,12 @@ CREATE INDEX IF NOT EXISTS idx_payments_lookup ON payments(payer_id, month, year
 
 CREATE TABLE IF NOT EXISTS salary_payouts (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  coach_id INTEGER NOT NULL REFERENCES coaches(id),
+  coach_id INTEGER NOT NULL,
   month INTEGER NOT NULL,
   year INTEGER NOT NULL,
   amount INTEGER NOT NULL,
   paid_on DATE NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(coach_id, month, year)
 );
 

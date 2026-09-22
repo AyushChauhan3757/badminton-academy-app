@@ -6,7 +6,7 @@ import pytz
 from utils.ui_helpers import render_dialog_icon, render_dialog_message
 
 # ⚠️ TEMPORARY DEV BYPASS — set to False before any real testing or deployment.
-DEV_SKIP_LOGIN = True
+DEV_SKIP_LOGIN = False
 DEV_SKIP_LOGIN_ROLE = ROLE_ADMIN # change to ROLE_COACH if you want to test coach view instead
 
 IST = pytz.timezone("Asia/Kolkata")
