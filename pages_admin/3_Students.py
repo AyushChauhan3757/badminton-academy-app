@@ -6,7 +6,14 @@ from constants import BATCH_FEES, BATCH_TIMINGS, ROLE_ADMIN
 from db.students import add_student, delete_student, get_all_students, update_student
 from utils.auth import require_role
 from utils.header import render_header
-from utils.ui_helpers import batch_pill, timing_pill, render_dialog_icon, render_dialog_message, queue_toast
+from utils.ui_helpers import (
+    batch_pill,
+    timing_pill,
+    render_dialog_icon,
+    render_dialog_message,
+    queue_toast,
+    tint_dialog_selects,
+)
 
 require_role([ROLE_ADMIN])
 
@@ -14,26 +21,36 @@ render_header("Students Roster")
 
 PAGE_SIZE = 10
 
-
-@st.dialog("Add Student", width="large")
+@st.dialog("Add Student", width="medium")
 def add_student_dialog():
-    col1, col2 = st.columns(2)
-    with col1:
-        name = st.text_input("Name")
-        batch = st.selectbox("Batch", options=list(BATCH_TIMINGS.keys()))
-        is_custom_fee = st.checkbox("Custom Fee")
-        fee = st.number_input(
-            "Fee",
-            value=BATCH_FEES[batch],
-            disabled=not is_custom_fee,
-        )
-    with col2:
-        admission_date = st.date_input("Admission Date", value=date.today(), format="DD/MM/YYYY")
-        timing = st.selectbox("Timing", options=BATCH_TIMINGS[batch])
-        guardian_name = st.text_input("Guardian Name")
-        phone = st.text_input("Phone")
+    c1, c2 = st.columns(2)
+    name = c1.text_input("Name")
+    phone = c2.text_input("Phone")
 
-    if st.button("Add Student", key="submit_add_student"):
+    c1, c2 = st.columns(2)
+    with c1:
+        with st.container(key="dlg_batch_add"):
+            batch = st.selectbox("Batch", options=list(BATCH_TIMINGS.keys()))
+    with c2:
+        with st.container(key="dlg_timing_add"):
+            timing = st.selectbox("Timing", options=BATCH_TIMINGS[batch])
+
+    c1, c2 = st.columns(2)
+    admission_date = c1.date_input("Admission Date", value=date.today(), format="DD/MM/YYYY")
+    guardian_name = c2.text_input("Guardian Name")
+
+    c1, c2 = st.columns(2)
+    is_custom_fee = c2.checkbox("Custom Fee", key="dlg_customfee_add")
+    fee = c1.number_input(
+        "Fee (₹)",
+        value=BATCH_FEES[batch],
+        disabled=not is_custom_fee,
+    )
+
+    b1, b2 = st.columns(2)
+    if b1.button("Cancel", key="dlg_secondary_addstudent_cancel", use_container_width=True):
+        st.rerun()
+    if b2.button("Add Student", key="dlg_primary_addstudent_save", use_container_width=True):
         if not name.strip():
             st.error("Name is required.")
         else:
@@ -49,6 +66,8 @@ def add_student_dialog():
             )
             queue_toast("Student Added", name.strip())
             st.rerun()
+
+    tint_dialog_selects(batch, timing, "add")
 
 
 with st.container(key="students_top_row"):
@@ -104,39 +123,53 @@ paginated_students = students[start_idx:end_idx]
 
 st.markdown("---")
 
-
-@st.dialog("Update Student", width="large")
+@st.dialog("Update Student", width="medium")
 def update_student_dialog(student):
-    col1, col2 = st.columns(2)
-    with col1:
-        name = st.text_input("Name", value=student["name"])
-        batch = st.selectbox(
-            "Batch",
-            options=list(BATCH_TIMINGS.keys()),
-            index=list(BATCH_TIMINGS.keys()).index(student["batch"]),
-        )
-        is_custom_fee = st.checkbox("Custom Fee", value=bool(student["is_custom_fee"]))
-        fee = st.number_input(
-            "Fee",
-            value=student["fees"] if is_custom_fee else BATCH_FEES[batch],
-            disabled=not is_custom_fee,
-            key=f"update_fee_{student['id']}_{batch}_{is_custom_fee}",
-        )
-    with col2:
-        admission_date = st.date_input(
-            "Admission Date",
-            value=date.fromisoformat(student["admission_date"]),
-            format="DD/MM/YYYY",
-        )
-        timing = st.selectbox(
-            "Timing",
-            options=BATCH_TIMINGS[batch],
-            index=BATCH_TIMINGS[batch].index(student["timing"]) if student["timing"] in BATCH_TIMINGS[batch] else 0,
-        )
-        guardian_name = st.text_input("Guardian Name", value=student["guardian_name"])
-        phone = st.text_input("Phone", value=student["phone"])
+    c1, c2 = st.columns(2)
+    name = c1.text_input("Name", value=student["name"])
+    phone = c2.text_input("Phone", value=student["phone"])
 
-    if st.button("Save Changes", key="submit_update_student"):
+    c1, c2 = st.columns(2)
+    with c1:
+        with st.container(key="dlg_batch_upd"):
+            batch = st.selectbox(
+                "Batch",
+                options=list(BATCH_TIMINGS.keys()),
+                index=list(BATCH_TIMINGS.keys()).index(student["batch"]),
+            )
+    with c2:
+        with st.container(key="dlg_timing_upd"):
+            timing = st.selectbox(
+                "Timing",
+                options=BATCH_TIMINGS[batch],
+                index=BATCH_TIMINGS[batch].index(student["timing"]) if student["timing"] in BATCH_TIMINGS[batch] else 0,
+            )
+
+    c1, c2 = st.columns(2)
+    admission_date = c1.date_input(
+        "Admission Date",
+        value=date.fromisoformat(student["admission_date"]),
+        format="DD/MM/YYYY",
+    )
+    guardian_name = c2.text_input("Guardian Name", value=student["guardian_name"])
+
+    c1, c2 = st.columns(2)
+    is_custom_fee = c2.checkbox(
+        "Custom Fee",
+        value=bool(student["is_custom_fee"]),
+        key=f"dlg_customfee_upd_{student['id']}",
+    )
+    fee = c1.number_input(
+        "Fee (₹)",
+        value=student["fees"] if is_custom_fee else BATCH_FEES[batch],
+        disabled=not is_custom_fee,
+        key=f"update_fee_{student['id']}_{batch}_{is_custom_fee}",
+    )
+
+    b1, b2 = st.columns(2)
+    if b1.button("Cancel", key=f"dlg_secondary_updstudent_cancel_{student['id']}", use_container_width=True):
+        st.rerun()
+    if b2.button("Save Changes", key=f"dlg_primary_updstudent_save_{student['id']}", use_container_width=True):
         if not name.strip():
             st.error("Name is required.")
         else:
@@ -153,6 +186,8 @@ def update_student_dialog(student):
             )
             queue_toast("Student Updated", name.strip())
             st.rerun()
+
+    tint_dialog_selects(batch, timing, "upd")
 
 
 @st.dialog("Delete Student")

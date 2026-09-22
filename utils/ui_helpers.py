@@ -41,3 +41,34 @@ def show_pending_toast():
         if toast["detail"]:
             body += f"\n\n{toast['detail']}"
         st.toast(body, icon=TOAST_ICONS.get(toast["kind"], TOAST_ICONS["success"]))
+
+
+BATCH_COLORS = {
+    "Beginner": ("#EAF1FB", "#1D4C82"),
+    "Advanced 1": ("#FBF0DC", "#A9711B"),
+    "Advanced 2": ("#F3E8FB", "#7B3FA0"),
+}
+TIMING_COLORS = {
+    "4-5": ("#E9F7F6", "#0E7C86"),
+    "5-6": ("#FDEEDC", "#B4530A"),
+    "6-7": ("#F3E8FB", "#7B3FA0"),
+    "4-6": ("#EAF1FB", "#1D4C82"),
+}
+
+def tint_dialog_selects(batch, timing, suffix):
+    """Tint the closed Batch/Timing selectboxes to match the table pills."""
+    rules = ""
+    for key, value, palette in (
+        (f"dlg_batch_{suffix}", batch, BATCH_COLORS),
+        (f"dlg_timing_{suffix}", timing, TIMING_COLORS),
+    ):
+        bg, fg = palette.get(value, ("#FFFFFF", "#14304F"))
+        rules += f"""
+        .st-key-{key} [role="group"] {{ background-color: {bg} !important; }}
+        .st-key-{key} [role="group"],
+        .st-key-{key} [role="group"] * {{
+            color: {fg} !important;
+            -webkit-text-fill-color: {fg} !important;
+            font-weight: 700 !important;
+        }}"""
+    st.markdown(f"<style>{rules}</style>", unsafe_allow_html=True)

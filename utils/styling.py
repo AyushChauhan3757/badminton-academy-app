@@ -1364,6 +1364,21 @@ def apply_dialog_styles():
     span[data-testid="stToastDynamicIcon"] {
         color: #14304F !important;
     }
+    div[class*="st-key-dlg_customfee"] {
+        width: 100% !important;
+    }
+    div[class*="st-key-dlg_customfee"] [data-testid="stCheckbox"] {
+        width: 100% !important;
+    }
+    div[class*="st-key-dlg_customfee"] label {
+        background-color: transparent !important;
+        border-radius: 0.5rem !important;
+        height: 68px !important;
+        width: 100% !important;
+        padding: 0 1rem !important;
+        box-sizing: border-box !important;
+        align-items: center !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 

@@ -26,7 +26,10 @@ def add_gym_member_dialog():
     phone = st.text_input("Phone")
     joining_date = st.date_input("Joining Date", value=date.today(), format="DD/MM/YYYY")
 
-    if st.button("Add Gym Member", key="submit_add_gym"):
+    b1, b2 = st.columns(2)
+    if b1.button("Cancel", key="dlg_secondary_addgym_cancel", use_container_width=True):
+        st.rerun()
+    if b2.button("Add Gym Member", key="dlg_primary_addgym_save", use_container_width=True):
         if not name.strip():
             st.error("Name is required.")
         else:
@@ -95,7 +98,10 @@ def edit_gym_member_dialog(member):
         format="DD/MM/YYYY",
     )
 
-    if st.button("Save Changes", key="submit_update_gym"):
+    b1, b2 = st.columns(2)
+    if b1.button("Cancel", key=f"dlg_secondary_updgym_cancel_{member['id']}", use_container_width=True):
+        st.rerun()
+    if b2.button("Save Changes", key=f"dlg_primary_updgym_save_{member['id']}", use_container_width=True):
         if not name.strip():
             st.error("Name is required.")
         else:

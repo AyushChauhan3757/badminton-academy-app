@@ -17,7 +17,10 @@ def add_coach_dialog():
     phone = st.text_input("Phone")
     salary = st.number_input("Salary", min_value=0, step=500)
 
-    if st.button("Add Coach", key="submit_add_coach"):
+    b1, b2 = st.columns(2)
+    if b1.button("Cancel", key="dlg_secondary_addcoach_cancel", use_container_width=True):
+        st.rerun()
+    if b2.button("Add Coach", key="dlg_primary_addcoach_save", use_container_width=True):
         if not name.strip():
             st.error("Name is required.")
         else:
@@ -48,7 +51,10 @@ def edit_coach_dialog(coach):
     phone = st.text_input("Phone", value=coach["phone"])
     salary = st.number_input("Salary", min_value=0, step=500, value=coach["salary"])
 
-    if st.button("Save Changes", key="submit_update_coach"):
+    b1, b2 = st.columns(2)
+    if b1.button("Cancel", key=f"dlg_secondary_updcoach_cancel_{coach['id']}", use_container_width=True):
+        st.rerun()
+    if b2.button("Save Changes", key=f"dlg_primary_updcoach_save_{coach['id']}", use_container_width=True):
         if not name.strip():
             st.error("Name is required.")
         else:
